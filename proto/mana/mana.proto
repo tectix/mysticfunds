@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package mana;
+
+option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+
+import "google/protobuf/timestamp.proto";
+
+service ManaService {
+  rpc TransferMana(TransferManaRequest) returns (TransferManaResponse) {}
+  rpc GetManaBalance(GetManaBalanceRequest) returns (GetManaBalanceResponse) {}
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse) {}
+}
+
+message ManaTransaction {
+  int64 id = 1;
+  int64 from_wizard_id = 2;
+  int64 to_wizard_id = 3;
+  int64 amount = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message TransferManaRequest {
+  int64 from_wizard_id = 1;
+  int64 to_wizard_id = 2;
+  int64 amount = 3;
+}
+
+message TransferManaResponse {
+  bool success = 1;
+  string message = 2;
+  ManaTransaction transaction = 3;
+}
+
+message GetManaBalanceRequest {
+  int64 wizard_id = 1;
+}
+
+message GetManaBalanceResponse {
+  int64 balance = 1;
+}
+
+message ListTransactionsRequest {
+  int64 wizard_id = 1;
+  int32 page_size = 2;
+  int32 page_number = 3;
+}
+
+message ListTransactionsResponse {
+  repeated ManaTransaction transactions = 1;
+  int32 total_count = 2;
+}

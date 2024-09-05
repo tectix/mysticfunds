@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package realm;
+
+option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+
+import "google/protobuf/timestamp.proto";
+
+service RealmService {
+  rpc CreateRealm(CreateRealmRequest) returns (Realm) {}
+  rpc GetRealm(GetRealmRequest) returns (Realm) {}
+  rpc ListRealms(ListRealmsRequest) returns (ListRealmsResponse) {}
+  rpc UpdateRealm(UpdateRealmRequest) returns (Realm) {}
+  rpc DeleteRealm(DeleteRealmRequest) returns (DeleteRealmResponse) {}
+  
+  rpc CreateProperty(CreatePropertyRequest) returns (Property) {}
+  rpc GetProperty(GetPropertyRequest) returns (Property) {}
+  rpc ListProperties(ListPropertiesRequest) returns (ListPropertiesResponse) {}
+  rpc UpdateProperty(UpdatePropertyRequest) returns (Property) {}
+  rpc DeleteProperty(DeletePropertyRequest) returns (DeletePropertyResponse) {}
+  
+  rpc BuyProperty(BuyPropertyRequest) returns (BuyPropertyResponse) {}
+}
+
+message Realm {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double mana_boost_factor = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message Property {
+  int64 id = 1;
+  int64 realm_id = 2;
+  string name = 3;
+  string description = 4;
+  int64 price = 5;
+  int64 owner_id = 6;  
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateRealmRequest {
+  string name = 1;
+  string description = 2;
+  double mana_boost_factor = 3;
+}
+
+message GetRealmRequest {
+  int64 id = 1;
+}
+
+message ListRealmsRequest {
+  int32 page_size = 1;
+  int32 page_number = 2;
+}
+
+message ListRealmsResponse {
+  repeated Realm realms = 1;
+  int32 total_count = 2;
+}
+
+message UpdateRealmRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double mana_boost_factor = 4;
+}
+
+message DeleteRealmRequest {
+  int64 id = 1;
+}
+
+message DeleteRealmResponse {
+  bool success = 1;
+}
+
+message CreatePropertyRequest {
+  int64 realm_id = 1;
+  string name = 2;
+  string description = 3;
+  int64 price = 4;
+}
+
+message GetPropertyRequest {
+  int64 id = 1;
+}
+
+message ListPropertiesRequest {
+  int64 realm_id = 1;
+  int32 page_size = 2;
+  int32 page_number = 3;
+}
+
+message ListPropertiesResponse {
+  repeated Property properties = 1;
+  int32 total_count = 2;
+}
+
+message UpdatePropertyRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 price = 4;
+}
+
+message DeletePropertyRequest {
+  int64 id = 1;
+}
+
+message DeletePropertyResponse {
+  bool success = 1;
+}
+
+message BuyPropertyRequest {
+  int64 property_id = 1;
+  int64 buyer_id = 2;  
+}
+
+message BuyPropertyResponse {
+  bool success = 1;
+  string message = 2;
+  Property property = 3;
+}
