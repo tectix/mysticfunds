@@ -10,7 +10,7 @@
 *.out
 
 go.work
-
+vendor
 # Environment variables
 *.env
 
