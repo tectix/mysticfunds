@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package wizard;
+
+option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+
+import "google/protobuf/timestamp.proto";
+
+service WizardService {
+  rpc CreateWizard(CreateWizardRequest) returns (Wizard) {}
+  rpc GetWizard(GetWizardRequest) returns (Wizard) {}
+  rpc UpdateWizard(UpdateWizardRequest) returns (Wizard) {}
+  rpc ListWizards(ListWizardsRequest) returns (ListWizardsResponse) {}
+  rpc DeleteWizard(DeleteWizardRequest) returns (DeleteWizardResponse) {}
+}
+
+message Wizard {
+  int64 id = 1;
+  string name = 2;
+  string realm = 3;
+  int64 mana_balance = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateWizardRequest {
+  string name = 1;
+  string realm = 2;
+}
+
+message GetWizardRequest {
+  int64 id = 1;
+}
+
+message UpdateWizardRequest {
+  int64 id = 1;
+  string name = 2;
+  string realm = 3;
+}
+
+message ListWizardsRequest {
+  int32 page_size = 1;
+  int32 page_number = 2;
+}
+
+message ListWizardsResponse {
+  repeated Wizard wizards = 1;
+  int32 total_count = 2;
+}
+
+message DeleteWizardRequest {
+  int64 id = 1;
+}
+
+message DeleteWizardResponse {
+  bool success = 1;
+}

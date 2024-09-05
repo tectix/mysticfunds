@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package spell;
+
+option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+
+import "google/protobuf/timestamp.proto";
+
+service SpellService {
+  rpc CreateSpell(CreateSpellRequest) returns (Spell) {}
+  rpc GetSpell(GetSpellRequest) returns (Spell) {}
+  rpc ListSpells(ListSpellsRequest) returns (ListSpellsResponse) {}
+  rpc LearnSpell(LearnSpellRequest) returns (LearnSpellResponse) {}
+  rpc CastSpell(CastSpellRequest) returns (CastSpellResponse) {}
+}
+
+message Spell {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 mana_cost = 4;
+  string realm = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message CreateSpellRequest {
+  string name = 1;
+  string description = 2;
+  int64 mana_cost = 3;
+  string realm = 4;
+}
+
+message GetSpellRequest {
+  int64 id = 1;
+}
+
+message ListSpellsRequest {
+  string realm = 1;
+  int32 page_size = 2;
+  int32 page_number = 3;
+}
+
+message ListSpellsResponse {
+  repeated Spell spells = 1;
+  int32 total_count = 2;
+}
+
+message LearnSpellRequest {
+  int64 wizard_id = 1;
+  int64 spell_id = 2;
+}
+
+message LearnSpellResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message CastSpellRequest {
+  int64 wizard_id = 1;
+  int64 spell_id = 2;
+  int64 target_id = 3;
+}
+
+message CastSpellResponse {
+  bool success = 1;
+  string message = 2;
+  int64 mana_cost = 3;
+}
