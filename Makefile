@@ -6,7 +6,7 @@ PG_PASSWORD := password
 
 SERVICES := auth wizard mana spell realm
 
-.PHONY: all create-dbs init-migrations migrate-up migrate-down migration-status proto build run test clean help
+.PHONY: all create-dbs nuke init-migrations migrate-up migrate-down migration-status proto build run test clean help
 
 all: create-dbs migrate-up build
 
@@ -17,34 +17,42 @@ create-dbs:
 		psql -h $(PG_HOST) -p $(PG_PORT) -U $(PG_USER) -d postgres -c "CREATE DATABASE %%s;" \
 	)
 
+nuke:
+	@echo "Dropping databases..."
+	@for %%s in ($(SERVICES)) do ( \
+		set "PGPASSWORD=$(PG_PASSWORD)" && \
+		echo "Terminating connections for %%s..." && \
+		psql -h $(PG_HOST) -p $(PG_PORT) -U $(PG_USER) -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '%%s';" && \
+		psql -h $(PG_HOST) -p $(PG_PORT) -U $(PG_USER) -d postgres -c "DROP DATABASE IF EXISTS %%s;" \
+	)
+
 init-migrations:
 	@echo "Initializing migrations..."
 	@powershell.exe -Command "$$services = '$(SERVICES)'.Split(' '); foreach ($$s in $$services) { \
-		Write-Host 'Creating migration for' $$s; \
 		migrate create -ext sql -dir migrations/$$s -seq 'init' \
 	}"
 
 migrate-up:
 	@echo "Running migrations up..."
 	@powershell.exe -Command "$$services = '$(SERVICES)'.Split(' '); foreach ($$s in $$services) { \
-		Write-Host 'Migrating' $$s; \
-		migrate -path migrations/$$s -database \"postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$$s?sslmode=disable\" up; \
+		$$connString = 'postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/' + $$s + '?sslmode=disable'; \
+		migrate -path migrations/$$s -database $$connString up; \
 	}"
+
 
 migrate-down:
 	@echo "Running migrations down..."
 	@powershell.exe -Command "$$services = '$(SERVICES)'.Split(' '); foreach ($$s in $$services) { \
-		Write-Host 'Reverting' $$s; \
-		migrate -path migrations/$$s -database \"postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$$s?sslmode=disable\" down; \
+		$$connString = 'postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/' + $$s + '?sslmode=disable'; \
+		migrate -path migrations/$$s -database $$connString down; \
 	}"
 
 migration-status:
 	@echo "Checking migration status..."
 	@powershell.exe -Command "$$services = '$(SERVICES)'.Split(' '); foreach ($$s in $$services) { \
-		Write-Host 'Status for' $$s; \
-		migrate -path migrations/$$s -database \"postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$$s?sslmode=disable\" version; \
+		$$connString = 'postgresql://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/' + $$s + '?sslmode=disable'; \
+		migrate -path migrations/$$s -database $$connString version; \
 	}"
-
 proto:
 	@echo "Generating protobuf code..."
 	@for %%s in ($(SERVICES)) do ( \
