@@ -1,0 +1,31 @@
+```mermaid
+graph TD
+    A[API Gateway]
+    B[Auth Service]
+    C[Wizard Service]
+    D[Mana Service]
+    E[Spell Service]
+    F[Realm Service]
+    G[(Auth DB)]
+    H[(Wizard DB)]
+    I[(Mana DB)]
+    J[(Spell DB)]
+    K[(Realm DB)]
+
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    A --> F
+    B <--> G
+    C <--> H
+    D <--> I
+    E <--> J
+    F <--> K
+    C -.-> B
+    D -.-> B
+    E -.-> B
+    F -.-> B
+    D -.-> C
+    E -.-> C
+```

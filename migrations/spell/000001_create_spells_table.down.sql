@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS spells;
+DROP TABLE IF EXISTS wizard_spells;
