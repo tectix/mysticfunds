@@ -18,15 +18,21 @@ type JWTClaims struct {
 }
 
 func GenerateToken(userID int64, secretKey string, expirationTime time.Duration) (string, error) {
+	now := time.Now()
+	expiresAt := now.Add(expirationTime)
+
 	claims := &JWTClaims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(expirationTime).Unix(),
+			ExpiresAt: expiresAt.Unix(),
+			IssuedAt:  now.Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secretKey))
+	tokenString, err := token.SignedString([]byte(secretKey))
+
+	return tokenString, err
 }
 
 func ValidateToken(tokenString string, secretKey string) (*JWTClaims, error) {

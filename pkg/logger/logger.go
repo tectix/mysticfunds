@@ -5,9 +5,21 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var log *zap.Logger
+type Logger interface {
+	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...interface{})
+	Warn(msg string, keysAndValues ...interface{})
+	Error(msg string, keysAndValues ...interface{})
+	Fatal(msg string, keysAndValues ...interface{})
+	With(keysAndValues ...interface{}) Logger
+}
 
-func Init(logLevel string) {
+type zapLogger struct {
+	logger *zap.SugaredLogger
+}
+
+// NewLogger creates a new Logger
+func NewLogger(logLevel string) Logger {
 	config := zap.NewProductionConfig()
 
 	level, err := zapcore.ParseLevel(logLevel)
@@ -16,28 +28,38 @@ func Init(logLevel string) {
 	}
 	config.Level.SetLevel(level)
 
-	log, err = config.Build()
+	logger, err := config.Build()
 	if err != nil {
 		panic(err)
 	}
+
+	return &zapLogger{
+		logger: logger.Sugar(),
+	}
 }
 
-func Info(message string, fields ...zap.Field) {
-	log.Info(message, fields...)
+func (l *zapLogger) Debug(msg string, keysAndValues ...interface{}) {
+	l.logger.Debugw(msg, keysAndValues...)
 }
 
-func Warn(message string, fields ...zap.Field) {
-	log.Warn(message, fields...)
+func (l *zapLogger) Info(msg string, keysAndValues ...interface{}) {
+	l.logger.Infow(msg, keysAndValues...)
 }
 
-func Error(message string, fields ...zap.Field) {
-	log.Error(message, fields...)
+func (l *zapLogger) Warn(msg string, keysAndValues ...interface{}) {
+	l.logger.Warnw(msg, keysAndValues...)
 }
 
-func Fatal(message string, fields ...zap.Field) {
-	log.Fatal(message, fields...)
+func (l *zapLogger) Error(msg string, keysAndValues ...interface{}) {
+	l.logger.Errorw(msg, keysAndValues...)
 }
 
-func With(fields ...zap.Field) *zap.Logger {
-	return log.With(fields...)
+func (l *zapLogger) Fatal(msg string, keysAndValues ...interface{}) {
+	l.logger.Fatalw(msg, keysAndValues...)
+}
+
+func (l *zapLogger) With(keysAndValues ...interface{}) Logger {
+	return &zapLogger{
+		logger: l.logger.With(keysAndValues...),
+	}
 }
