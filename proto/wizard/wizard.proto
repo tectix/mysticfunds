@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package wizard;
 
-option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+option go_package = "github.com/Alinoureddine1/mysticfunds/proto/wizard";
 
 import "google/protobuf/timestamp.proto";
 
@@ -12,20 +12,32 @@ service WizardService {
   rpc UpdateWizard(UpdateWizardRequest) returns (Wizard) {}
   rpc ListWizards(ListWizardsRequest) returns (ListWizardsResponse) {}
   rpc DeleteWizard(DeleteWizardRequest) returns (DeleteWizardResponse) {}
+  rpc JoinGuild(JoinGuildRequest) returns (Wizard) {}
+  rpc LeaveGuild(LeaveGuildRequest) returns (Wizard) {}
 }
 
 message Wizard {
   int64 id = 1;
+  int64 user_id = 2;
+  string name = 3;
+  string realm = 4;
+  int64 mana_balance = 5;
+  string element = 6;
+  Guild guild = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message Guild {
+  int64 id = 1;
   string name = 2;
-  string realm = 3;
-  int64 mana_balance = 4;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
 }
 
 message CreateWizardRequest {
-  string name = 1;
-  string realm = 2;
+  int64 user_id = 1;
+  string name = 2;
+  string realm = 3;
+  string element = 4;
 }
 
 message GetWizardRequest {
@@ -36,6 +48,7 @@ message UpdateWizardRequest {
   int64 id = 1;
   string name = 2;
   string realm = 3;
+  string element = 4;
 }
 
 message ListWizardsRequest {
@@ -54,4 +67,13 @@ message DeleteWizardRequest {
 
 message DeleteWizardResponse {
   bool success = 1;
+}
+
+message JoinGuildRequest {
+  int64 wizard_id = 1;
+  string guild_name = 2;
+}
+
+message LeaveGuildRequest {
+  int64 wizard_id = 1;
 }
