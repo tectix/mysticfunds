@@ -2,43 +2,52 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Environment string `mapstructure:"ENVIRONMENT"`
-	LogLevel    string `mapstructure:"LOG_LEVEL"`
-
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     int    `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-
-	ServerHost string `mapstructure:"SERVER_HOST"`
-	ServerPort int    `mapstructure:"SERVER_PORT"`
-
-	JWTSecret string `mapstructure:"JWT_SECRET"`
+	ServiceName string   `mapstructure:"SERVICE_NAME"`
+	GRPCPort    int      `mapstructure:"GRPC_PORT"`
+	LogLevel    string   `mapstructure:"LOG_LEVEL"`
+	JWTSecret   string   `mapstructure:"JWT_SECRET"`
+	DB          DBConfig `mapstructure:",squash"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+type DBConfig struct {
+	Host     string `mapstructure:"DB_HOST"`
+	Port     int    `mapstructure:"DB_PORT"`
+	User     string `mapstructure:"DB_USER"`
+	Password string `mapstructure:"DB_PASSWORD"`
+	Name     string `mapstructure:"DB_NAME"`
+}
 
+func LoadConfig() (*Config, error) {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			return nil, fmt.Errorf("config file not found: %w", err)
+		}
+		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	err = viper.Unmarshal(&config)
-	return
-}
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("unable to decode config into struct: %w", err)
+	}
 
-func (c *Config) GetDBConnString() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		c.DBHost, c.DBPort, c.DBUser, c.DBPassword, c.DBName)
+	if config.LogLevel == "" {
+		config.LogLevel = "info"
+	}
+
+	if config.DB.Name == "" {
+		config.DB.Name = os.Getenv("SERVICE_NAME")
+	}
+
+	return &config, nil
 }

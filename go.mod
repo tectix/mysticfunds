@@ -4,8 +4,10 @@ go 1.21.5
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
+	golang.org/x/crypto v0.24.0
 	google.golang.org/grpc v1.66.0
 	google.golang.org/protobuf v1.34.1
 )

@@ -1,0 +1,12 @@
+{
+    "auth_service_address": ":50051",
+    "auth_db": {
+      "host": "localhost",
+      "port": 3306,
+      "user": "postgres",
+      "password": "password",
+      "dbname": "mysticfunds_auth"
+    },
+    "jwt_secret": "K5RJ8Hs+VkO7YdLMnJQEluPQciNAfjB1hZ4/98N8kg8=",
+    "log_level": "info"
+  }
