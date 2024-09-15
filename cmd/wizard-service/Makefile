@@ -1,7 +1,7 @@
-# Auth Service Makefile
+# Wizard Service Makefile
 
 # Variables
-SERVICE_NAME := auth-service
+SERVICE_NAME := wizard-service
 BINARY_NAME := $(SERVICE_NAME)
 MAIN_FILE := main.go
 CONFIG_FILE := config.yaml
@@ -15,7 +15,7 @@ DB_HOST := localhost
 DB_PORT := 5432
 DB_USER := postgres
 DB_PASSWORD := password
-DB_NAME := auth
+DB_NAME := wizard
 
 # Build the binary
 build:
@@ -40,7 +40,7 @@ migrate-down:
 # Run tests
 test:
 	@echo "Running tests for $(SERVICE_NAME)..."
-	@go test ../../internal/auth -v
+	@go test ../../internal/wizard -v
 
 # Clean up binary
 clean:
@@ -53,6 +53,6 @@ proto:
 	@echo "Generating proto files..."
 	@protoc --go_out=../../ --go_opt=paths=source_relative \
 			--go-grpc_out=../../ --go-grpc_opt=paths=source_relative \
-			../../proto/auth/auth.proto
+			../../proto/wizard/wizard.proto
 
 .PHONY: build run migrate migrate-down test clean proto
