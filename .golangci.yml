@@ -1,0 +1,17 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+issues:
+  exclude-rules:
+    - linters:
+        - staticcheck
+      text: "SA1019: grpc.Dial is deprecated"
+
+run:
+  timeout: 5m

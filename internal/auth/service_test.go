@@ -11,7 +11,6 @@ import (
 	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
 	pb "github.com/Alinoureddine1/mysticfunds/proto/auth"
 	"github.com/DATA-DOG/go-sqlmock"
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -121,18 +120,6 @@ func TestRefreshToken(t *testing.T) {
 	assert.True(t, expirationTime.After(time.Now()), "New token should have a future expiration time")
 }
 
-func printTokenDetails(t *testing.T, tokenString string, label string) {
-	token, _ := jwt.ParseWithClaims(tokenString, &jwtauth.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("test_secret"), nil
-	})
-
-	if claims, ok := token.Claims.(*jwtauth.JWTClaims); ok {
-		t.Logf("%s details:", label)
-		t.Logf("  User ID: %d", claims.UserID)
-		t.Logf("  Issued At: %v", time.Unix(claims.IssuedAt, 0))
-		t.Logf("  Expires At: %v", time.Unix(claims.ExpiresAt, 0))
-	}
-}
 func TestLogout(t *testing.T) {
 	_, _, service := setupTest(t)
 

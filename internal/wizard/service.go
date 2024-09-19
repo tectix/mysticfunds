@@ -175,7 +175,11 @@ func (s *WizardServiceImpl) JoinGuild(ctx context.Context, req *pb.JoinGuildRequ
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to start transaction")
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+			s.logger.Error("Failed to rollback transaction", "error", err)
+		}
+	}()
 
 	var guildId int64
 	err = tx.QueryRowContext(ctx, "SELECT id FROM guilds WHERE name = $1", req.GuildName).Scan(&guildId)
