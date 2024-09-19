@@ -1,0 +1,54 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, wizard-service]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.19
+
+    - name: Build ${{ matrix.service }}
+      run: |
+        cd cmd/${{ matrix.service }}
+        go build -v ./...
+
+    - name: Test ${{ matrix.service }}
+      run: |
+        go test -v ./internal/${{ matrix.service == 'auth-service' && 'auth' || 'wizard' }}/...
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.19
+
+    - name: Lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: latest
+
+  deploy:
+    needs: [build-and-test, lint]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+    - uses: actions/checkout@v2
+
