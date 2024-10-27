@@ -1,0 +1,15 @@
+SERVICE_NAME: mana-service
+GRPC_PORT: 50053
+LOG_LEVEL: info
+JWT_SECRET: your_jwt_secret_here
+
+DB_HOST: localhost
+DB_PORT: 5432
+DB_USER: postgres
+DB_PASSWORD: password
+DB_NAME: mana
+
+# Investment Configuration
+MIN_INVESTMENT_AMOUNT: 100
+MAX_INVESTMENT_DURATION: 720
+CLEANUP_INTERVAL: 6
