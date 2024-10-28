@@ -44,14 +44,19 @@ DB_NAME := $(SERVICE_NAME)
 
 # Build the binary
 build:
-	@echo Building $(SERVICE_NAME) service...
-	@go build -o "$(BINARY_NAME)" "$(MAIN_FILE)"
+	@echo "Building $(SERVICE_NAME) service..."
+	@if not exist "bin" $(MKDIR) "bin"
+	@go build -o "bin/$(SERVICE_NAME)$(BINARY_EXT)" main.go
 
 # Run the service
-run: build
-	@echo Running $(SERVICE_NAME) service...
-	@.\$(BINARY_NAME)
-
+run:
+	@echo "Running $(SERVICE_NAME) service..."
+	@if exist "bin\$(SERVICE_NAME)$(BINARY_EXT)" ( \
+		bin\$(SERVICE_NAME)$(BINARY_EXT) \
+	) else ( \
+		echo Service $(SERVICE_NAME) not built \
+	)
+	
 # Initialize migrations
 init-migrations:
 	@echo Initializing migrations for $(SERVICE_NAME) service...
