@@ -5,6 +5,8 @@ go 1.21.5
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/cors v1.2.1
 	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
@@ -12,6 +14,7 @@ require (
 	golang.org/x/crypto v0.24.0
 	google.golang.org/grpc v1.66.2
 	google.golang.org/protobuf v1.34.1
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
