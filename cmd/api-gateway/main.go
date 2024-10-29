@@ -11,9 +11,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Alinoureddine1/mysticfunds/cmd/api-gateway/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gopkg.in/yaml.v2"
 )
 
@@ -81,11 +83,28 @@ func main() {
 	// Initialize router
 	r := chi.NewRouter()
 
+	// Initialize gRPC connections
+	authConn, err := grpc.NewClient(
+		fmt.Sprintf("%s:%d", config.Services.Auth.Host, config.Services.Auth.Port),
+		// grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to auth service: %v", err)
+	}
+	defer authConn.Close()
+
+	// Setup middleware
+	middleware.Setup(r, &middleware.Config{
+		JWTSecret: config.Security.JWTSecret,
+		AuthConn:  authConn,
+	})
+
 	// Basic middleware
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	// r.Use(middleware.RequestID)
+	// r.Use(middleware.RealIP)
+	// r.Use(middleware.Logger)
+	// r.Use(middleware.Recoverer)
 
 	// CORS middleware
 	r.Use(cors.Handler(cors.Options{
