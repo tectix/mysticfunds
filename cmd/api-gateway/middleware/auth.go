@@ -16,7 +16,6 @@ type AuthMiddleware struct {
 	publicPaths map[string]bool
 }
 
-// Create a new AuthMiddleware instance
 func NewAuthMiddleware(jwtSecret string, authConn *grpc.ClientConn, publicPaths []string) *AuthMiddleware {
 	paths := make(map[string]bool)
 	for _, path := range publicPaths {
@@ -55,7 +54,7 @@ func (m *AuthMiddleware) Handler(next http.Handler) http.Handler {
 
 		tokenString := parts[1]
 
-		// First, validate token locally
+		// Validate token locally
 		claims, err := auth.ValidateToken(tokenString, m.jwtSecret)
 		if err != nil {
 			switch err {
