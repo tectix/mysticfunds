@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/wizard"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/wizard"
 )
 
 func setupTest(t *testing.T) (*sql.DB, sqlmock.Sqlmock, *WizardServiceImpl) {
@@ -26,21 +26,36 @@ func setupTest(t *testing.T) (*sql.DB, sqlmock.Sqlmock, *WizardServiceImpl) {
 	}
 	log := logger.NewLogger("debug")
 
-	return db, mock, NewWizardServiceImpl(db, cfg, log)
+	// Create service manually without auto-starting ticker
+	service := &WizardServiceImpl{
+		db:     db,
+		cfg:    cfg,
+		logger: log,
+		ticker: nil, // Don't start ticker in tests
+	}
+
+	return db, mock, service
 }
 
 func TestCreateWizard(t *testing.T) {
 	db, mock, service := setupTest(t)
 	defer db.Close()
 
+	// Mock the wizard count check
+	mock.ExpectQuery("SELECT COUNT\\(\\*\\) FROM wizards WHERE user_id = \\$1").
+		WithArgs(1).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+
+	// Mock the wizard insertion
 	mock.ExpectQuery("INSERT INTO wizards").
 		WithArgs(1, "TestWizard", "TestRealm", "Fire").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
+	// Mock the wizard retrieval
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
 		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 0, nil, nil, nil, nil))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 0, time.Now(), time.Now(), 0, 1, nil, nil))
 
 	resp, err := service.CreateWizard(context.Background(), &pb.CreateWizardRequest{
 		UserId:  1,
@@ -67,8 +82,8 @@ func TestGetWizard(t *testing.T) {
 
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
 		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, createdAt, updatedAt, 1, "TestGuild"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, createdAt, updatedAt, 500, 5, 1, "TestGuild"))
 
 	wizard, err := service.GetWizard(context.Background(), &pb.GetWizardRequest{Id: 1})
 
@@ -80,6 +95,8 @@ func TestGetWizard(t *testing.T) {
 	assert.Equal(t, "TestRealm", wizard.Realm)
 	assert.Equal(t, "Fire", wizard.Element)
 	assert.Equal(t, int64(100), wizard.ManaBalance)
+	assert.Equal(t, int32(500), wizard.ExperiencePoints)
+	assert.Equal(t, int32(5), wizard.Level)
 	assert.Equal(t, timestamppb.New(createdAt), wizard.CreatedAt)
 	assert.Equal(t, timestamppb.New(updatedAt), wizard.UpdatedAt)
 	assert.NotNil(t, wizard.Guild)
@@ -99,8 +116,8 @@ func TestUpdateWizard(t *testing.T) {
 
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
 		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "UpdatedWizard", "UpdatedRealm", "Water", 100, time.Now(), time.Now(), nil, nil))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "UpdatedWizard", "UpdatedRealm", "Water", 100, time.Now(), time.Now(), 0, 1, nil, nil))
 
 	wizard, err := service.UpdateWizard(context.Background(), &pb.UpdateWizardRequest{
 		Id:      1,
@@ -124,9 +141,9 @@ func TestListWizards(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "Wizard1", "Realm1", "Fire", 100, time.Now(), time.Now(), 1, "Guild1").
-			AddRow(2, 2, "Wizard2", "Realm2", "Water", 200, time.Now(), time.Now(), 2, "Guild2"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "Wizard1", "Realm1", "Fire", 100, time.Now(), time.Now(), 50, 1, 1, "Guild1").
+			AddRow(2, 2, "Wizard2", "Realm2", "Water", 200, time.Now(), time.Now(), 150, 2, 2, "Guild2"))
 
 	mock.ExpectQuery("SELECT COUNT").
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(2))
@@ -178,8 +195,8 @@ func TestJoinGuild(t *testing.T) {
 
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
 		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, time.Now(), time.Now(), 1, "TestGuild"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, time.Now(), time.Now(), 200, 2, 1, "TestGuild"))
 
 	wizard, err := service.JoinGuild(context.Background(), &pb.JoinGuildRequest{
 		WizardId:  1,
@@ -205,8 +222,8 @@ func TestLeaveGuild(t *testing.T) {
 
 	mock.ExpectQuery("SELECT (.+) FROM wizards").
 		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "guild_id", "guild_name"}).
-			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, time.Now(), time.Now(), nil, nil))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "realm", "element", "mana_balance", "created_at", "updated_at", "experience_points", "level", "guild_id", "guild_name"}).
+			AddRow(1, 1, "TestWizard", "TestRealm", "Fire", 100, time.Now(), time.Now(), 100, 1, nil, nil))
 
 	wizard, err := service.LeaveGuild(context.Background(), &pb.LeaveGuildRequest{WizardId: 1})
 

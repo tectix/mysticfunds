@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Alinoureddine1/mysticfunds/internal/wizard"
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/database"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/wizard"
+	"github.com/tectix/mysticfunds/internal/wizard"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/database"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/wizard"
 	"google.golang.org/grpc"
 )
 

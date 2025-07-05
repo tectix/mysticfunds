@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	jwtauth "github.com/Alinoureddine1/mysticfunds/pkg/auth"
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/auth"
+	jwtauth "github.com/tectix/mysticfunds/pkg/auth"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/auth"
 )
 
 type AuthServiceImpl struct {
@@ -31,6 +31,27 @@ func NewAuthServiceImpl(db *sql.DB, cfg *config.Config, logger logger.Logger) *A
 }
 
 func (s *AuthServiceImpl) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
+	// Check if username already exists
+	var existingUserId int64
+	err := s.db.QueryRowContext(ctx, "SELECT id FROM users WHERE username = $1", req.Username).Scan(&existingUserId)
+	if err == nil {
+		return nil, status.Error(codes.AlreadyExists, "Username already exists")
+	}
+	if err != sql.ErrNoRows {
+		s.logger.Error("Failed to check existing username", "error", err)
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
+
+	// Check if email already exists
+	err = s.db.QueryRowContext(ctx, "SELECT id FROM users WHERE email = $1", req.Email).Scan(&existingUserId)
+	if err == nil {
+		return nil, status.Error(codes.AlreadyExists, "Email already exists")
+	}
+	if err != sql.ErrNoRows {
+		s.logger.Error("Failed to check existing email", "error", err)
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		s.logger.Error("Failed to hash password", "error", err)

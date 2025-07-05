@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package wizard;
 
-option go_package = "github.com/Alinoureddine1/mysticfunds/proto/wizard";
+option go_package = "github.com/tectix/mysticfunds/proto/wizard";
 
 import "google/protobuf/timestamp.proto";
 
@@ -14,6 +14,34 @@ service WizardService {
   rpc DeleteWizard(DeleteWizardRequest) returns (DeleteWizardResponse) {}
   rpc JoinGuild(JoinGuildRequest) returns (Wizard) {}
   rpc LeaveGuild(LeaveGuildRequest) returns (Wizard) {}
+  
+  // Jobs
+  rpc CreateJob(CreateJobRequest) returns (Job) {}
+  rpc GetJob(GetJobRequest) returns (Job) {}
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
+  rpc UpdateJob(UpdateJobRequest) returns (Job) {}
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse) {}
+  
+  // Job Assignments
+  rpc AssignWizardToJob(AssignWizardToJobRequest) returns (JobAssignment) {}
+  rpc GetJobAssignments(GetJobAssignmentsRequest) returns (GetJobAssignmentsResponse) {}
+  rpc CompleteJobAssignment(CompleteJobAssignmentRequest) returns (JobAssignment) {}
+  rpc CancelJobAssignment(CancelJobAssignmentRequest) returns (JobAssignment) {}
+  
+  // Job Progress
+  rpc UpdateJobProgress(UpdateJobProgressRequest) returns (JobProgress) {}
+  rpc GetJobProgress(GetJobProgressRequest) returns (JobProgress) {}
+  
+  // Activity Logs
+  rpc GetActivities(GetActivitiesRequest) returns (GetActivitiesResponse) {}
+  
+  // Realms
+  rpc GetRealms(GetRealmsRequest) returns (GetRealmsResponse) {}
+  
+  // Mana Management
+  rpc GetManaBalance(GetManaBalanceRequest) returns (GetManaBalanceResponse) {}
+  rpc UpdateManaBalance(UpdateManaBalanceRequest) returns (UpdateManaBalanceResponse) {}
+  rpc TransferMana(TransferManaRequest) returns (TransferManaResponse) {}
 }
 
 message Wizard {
@@ -26,6 +54,8 @@ message Wizard {
   Guild guild = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
+  int32 experience_points = 10;
+  int32 level = 11;
 }
 
 message Guild {
@@ -54,6 +84,8 @@ message UpdateWizardRequest {
 message ListWizardsRequest {
   int32 page_size = 1;
   int32 page_number = 2;
+  int64 user_id = 3; // Optional: filter wizards by user
+  string realm = 4; // Optional: filter by realm for exploration
 }
 
 message ListWizardsResponse {
@@ -76,4 +108,220 @@ message JoinGuildRequest {
 
 message LeaveGuildRequest {
   int64 wizard_id = 1;
+}
+
+// Job messages
+message Job {
+  int64 id = 1;
+  int64 realm_id = 2;
+  string realm_name = 3;
+  string title = 4;
+  string description = 5;
+  string required_element = 6;
+  int32 required_level = 7;
+  int32 mana_reward_per_hour = 8;
+  int32 exp_reward_per_hour = 9;
+  int32 duration_minutes = 10;
+  int32 max_wizards = 11;
+  int32 currently_assigned = 12;
+  string difficulty = 13;
+  string job_type = 14;
+  string location = 15;
+  string special_requirements = 16;
+  int64 created_by_wizard_id = 17;
+  google.protobuf.Timestamp created_at = 18;
+  google.protobuf.Timestamp updated_at = 19;
+  bool is_active = 20;
+}
+
+message JobAssignment {
+  int64 id = 1;
+  int64 job_id = 2;
+  int64 wizard_id = 3;
+  string wizard_name = 4;
+  google.protobuf.Timestamp assigned_at = 5;
+  google.protobuf.Timestamp started_at = 6;
+  google.protobuf.Timestamp completed_at = 7;
+  string status = 8;
+  int32 mana_earned = 9;
+  int32 exp_earned = 10;
+  string notes = 11;
+  Job job = 12;
+  JobProgress progress = 13;
+}
+
+message JobProgress {
+  int64 id = 1;
+  int64 assignment_id = 2;
+  google.protobuf.Timestamp started_at = 3;
+  google.protobuf.Timestamp last_updated_at = 4;
+  int32 progress_percentage = 5;
+  int32 time_worked_minutes = 6;
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// Job requests
+message CreateJobRequest {
+  int64 realm_id = 1;
+  string realm_name = 2;
+  string title = 3;
+  string description = 4;
+  string required_element = 5;
+  int32 required_level = 6;
+  int32 mana_reward_per_hour = 7;
+  int32 exp_reward_per_hour = 8;
+  int32 duration_minutes = 9;
+  int32 max_wizards = 10;
+  string difficulty = 11;
+  string job_type = 12;
+  string location = 13;
+  string special_requirements = 14;
+  int64 created_by_wizard_id = 15;
+}
+
+message GetJobRequest {
+  int64 id = 1;
+}
+
+message ListJobsRequest {
+  int32 page_size = 1;
+  int32 page_number = 2;
+  string realm = 3;
+  string element = 4;
+  string difficulty = 5;
+  bool only_active = 6;
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+  int32 total_count = 2;
+}
+
+message UpdateJobRequest {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  int32 mana_reward_per_hour = 4;
+  int32 exp_reward_per_hour = 5;
+  int32 max_wizards = 6;
+  bool is_active = 7;
+}
+
+message DeleteJobRequest {
+  int64 id = 1;
+}
+
+message DeleteJobResponse {
+  bool success = 1;
+}
+
+// Job assignment requests
+message AssignWizardToJobRequest {
+  int64 job_id = 1;
+  int64 wizard_id = 2;
+}
+
+message GetJobAssignmentsRequest {
+  int64 wizard_id = 1;
+  int64 job_id = 2;
+  string status = 3;
+  int32 page_size = 4;
+  int32 page_number = 5;
+}
+
+message GetJobAssignmentsResponse {
+  repeated JobAssignment assignments = 1;
+  int32 total_count = 2;
+}
+
+message CompleteJobAssignmentRequest {
+  int64 assignment_id = 1;
+}
+
+message CancelJobAssignmentRequest {
+  int64 assignment_id = 1;
+  string reason = 2;
+}
+
+// Job progress requests
+message UpdateJobProgressRequest {
+  int64 assignment_id = 1;
+  int32 progress_percentage = 2;
+  int32 time_worked_minutes = 3;
+}
+
+message GetJobProgressRequest {
+  int64 assignment_id = 1;
+}
+
+// Activity log requests
+message GetActivitiesRequest {
+  int64 user_id = 1;
+  int64 wizard_id = 2;
+  string activity_type = 3;
+  int32 page_size = 4;
+  int32 page_number = 5;
+}
+
+message GetActivitiesResponse {
+  repeated ActivityLog activities = 1;
+  int32 total_count = 2;
+}
+
+message ActivityLog {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 wizard_id = 3;
+  string activity_type = 4;
+  string activity_description = 5;
+  string metadata = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// Realm messages
+message GetRealmsRequest {
+  // Empty request for listing all realms
+}
+
+message GetRealmsResponse {
+  repeated Realm realms = 1;
+}
+
+message Realm {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+// Mana management messages
+message GetManaBalanceRequest {
+  int64 wizard_id = 1;
+}
+
+message GetManaBalanceResponse {
+  int64 balance = 1;
+}
+
+message UpdateManaBalanceRequest {
+  int64 wizard_id = 1;
+  int64 amount = 2; // Can be positive (add) or negative (subtract)
+  string reason = 3; // Optional reason for the update
+}
+
+message UpdateManaBalanceResponse {
+  int64 new_balance = 1;
+  bool success = 2;
+}
+
+message TransferManaRequest {
+  int64 from_wizard_id = 1;
+  int64 to_wizard_id = 2;
+  int64 amount = 3;
+  string reason = 4; // Optional reason for the transfer
+}
+
+message TransferManaResponse {
+  bool success = 1;
+  string message = 2;
 }

@@ -38,19 +38,24 @@ GOBIN := $(GOBASE)
 # Database configuration
 DB_HOST := localhost
 DB_PORT := 5432
-DB_USER := postgres
-DB_PASSWORD := password
+DB_USER := mysticfunds
+DB_PASSWORD := mysticfunds
 DB_NAME := $(SERVICE_NAME)
 
 # Build the binary
 build:
-	@echo Building $(SERVICE_NAME) service...
-	@go build -o "$(BINARY_NAME)" "$(MAIN_FILE)"
+	@echo "Building $(SERVICE_NAME) service..."
+	@$(MKDIR) bin
+	@go build -o bin/$(SERVICE_NAME)$(EXECUTABLE_EXTENSION) main.go
 
 # Run the service
-run: build
-	@echo Running $(SERVICE_NAME) service...
-	@.\$(BINARY_NAME)
+run:
+	@echo "Running $(SERVICE_NAME) service..."
+	@if [ -f "bin/$(SERVICE_NAME)$(EXECUTABLE_EXTENSION)" ]; then \
+		bin/$(SERVICE_NAME)$(EXECUTABLE_EXTENSION); \
+	else \
+		echo "Service $(SERVICE_NAME) not built"; \
+	fi
 
 # Initialize migrations
 init-migrations:

@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Alinoureddine1/mysticfunds/internal/mana"
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/database"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/mana"
+	"github.com/tectix/mysticfunds/internal/mana"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/database"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/mana"
 	"google.golang.org/grpc"
 )
 
@@ -29,12 +29,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize investment scheduler
-	scheduler := mana.NewInvestmentScheduler(db, log)
-	defer scheduler.Stop()
-
-	// Initialize mana service with investment handling
-	manaService := mana.NewManaServiceImpl(db, cfg, log, scheduler)
+	// Initialize mana service (creates its own scheduler internally)
+	manaService := mana.NewManaServiceImpl(db, cfg, log)
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
@@ -54,9 +50,6 @@ func main() {
 			log.Fatal("Failed to serve", "error", err)
 		}
 	}()
-
-	// Start investment scheduler in a goroutine
-	go scheduler.Start()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

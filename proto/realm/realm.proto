@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package realm;
 
-option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+option go_package = "github.com/tectix/mysticfunds/proto/auth";
 
 import "google/protobuf/timestamp.proto";
 

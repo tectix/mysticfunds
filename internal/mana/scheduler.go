@@ -7,23 +7,26 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
 )
 
 type InvestmentScheduler struct {
-	db     *sql.DB
-	log    logger.Logger
-	done   chan struct{}
-	mutex  sync.Mutex
-	active map[int64]*time.Timer
+	db           *sql.DB
+	log          logger.Logger
+	wizardClient wizardpb.WizardServiceClient
+	done         chan struct{}
+	mutex        sync.Mutex
+	active       map[int64]*time.Timer
 }
 
-func NewInvestmentScheduler(db *sql.DB, log logger.Logger) *InvestmentScheduler {
+func NewInvestmentScheduler(db *sql.DB, log logger.Logger, wizardClient wizardpb.WizardServiceClient) *InvestmentScheduler {
 	return &InvestmentScheduler{
-		db:     db,
-		log:    log,
-		done:   make(chan struct{}),
-		active: make(map[int64]*time.Timer),
+		db:           db,
+		log:          log,
+		wizardClient: wizardClient,
+		done:         make(chan struct{}),
+		active:       make(map[int64]*time.Timer),
 	}
 }
 
@@ -147,12 +150,12 @@ func (s *InvestmentScheduler) processInvestment(investmentId int64) {
 		return
 	}
 
-	// Credit returned amount to wizard
-	_, err = tx.ExecContext(ctx, `
-		UPDATE wizards 
-		SET mana_balance = mana_balance + $1 
-		WHERE id = $2`,
-		returnedAmount, investment.wizardId)
+	// Credit returned amount to wizard via wizard service
+	_, err = s.wizardClient.UpdateManaBalance(ctx, &wizardpb.UpdateManaBalanceRequest{
+		WizardId: investment.wizardId,
+		Amount:   returnedAmount,
+		Reason:   "Investment return",
+	})
 	if err != nil {
 		s.log.Error("Failed to credit return", "error", err, "investmentId", investmentId)
 		return

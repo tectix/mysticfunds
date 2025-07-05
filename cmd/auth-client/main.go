@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/Alinoureddine1/mysticfunds/proto/auth"
+	pb "github.com/tectix/mysticfunds/proto/auth"
 )
 
 const (

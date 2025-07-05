@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	jwtauth "github.com/Alinoureddine1/mysticfunds/pkg/auth"
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/auth"
+	jwtauth "github.com/tectix/mysticfunds/pkg/auth"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/auth"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
@@ -36,6 +36,17 @@ func TestRegister(t *testing.T) {
 	db, mock, service := setupTest(t)
 	defer db.Close()
 
+	// Mock the check for existing username
+	mock.ExpectQuery("SELECT id FROM users WHERE username = \\$1").
+		WithArgs("testuser").
+		WillReturnRows(sqlmock.NewRows([]string{"id"})) // Empty result = no existing user
+
+	// Mock the check for existing email
+	mock.ExpectQuery("SELECT id FROM users WHERE email = \\$1").
+		WithArgs("test@example.com").
+		WillReturnRows(sqlmock.NewRows([]string{"id"})) // Empty result = no existing email
+
+	// Mock the user insertion
 	mock.ExpectQuery("INSERT INTO users").
 		WithArgs("testuser", "test@example.com", sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -49,6 +60,8 @@ func TestRegister(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resp.Token)
 	assert.Equal(t, int64(1), resp.UserId)
+	
+	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestLogin(t *testing.T) {

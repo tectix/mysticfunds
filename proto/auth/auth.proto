@@ -1,7 +1,7 @@
 syntax = "proto3";
 package auth;
 
-option go_package = "github.com/Alinoureddine1/mysticfunds/proto/auth";
+option go_package = "github.com/tectix/mysticfunds/proto/auth";
 
 service AuthService {
     rpc Register(RegisterRequest) returns (AuthResponse) {}

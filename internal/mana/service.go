@@ -3,77 +3,75 @@ package mana
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/Alinoureddine1/mysticfunds/pkg/config"
-	"github.com/Alinoureddine1/mysticfunds/pkg/logger"
-	pb "github.com/Alinoureddine1/mysticfunds/proto/mana"
+	"github.com/tectix/mysticfunds/pkg/config"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	pb "github.com/tectix/mysticfunds/proto/mana"
+	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ManaServiceImpl struct {
-	db        *sql.DB
-	cfg       *config.Config
-	log       logger.Logger
-	scheduler *InvestmentScheduler
+	db           *sql.DB
+	cfg          *config.Config
+	log          logger.Logger
+	scheduler    *InvestmentScheduler
+	wizardClient wizardpb.WizardServiceClient
 	pb.UnimplementedManaServiceServer
 }
 
-func NewManaServiceImpl(db *sql.DB, cfg *config.Config, log logger.Logger, scheduler *InvestmentScheduler) *ManaServiceImpl {
+func NewManaServiceImpl(db *sql.DB, cfg *config.Config, log logger.Logger) *ManaServiceImpl {
+	// Create wizard service client
+	wizardConn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Error("Failed to connect to wizard service", "error", err)
+		panic(err)
+	}
+	wizardClient := wizardpb.NewWizardServiceClient(wizardConn)
+
+	// Create scheduler with wizard client
+	scheduler := NewInvestmentScheduler(db, log, wizardClient)
+	scheduler.Start()
+
 	return &ManaServiceImpl{
-		db:        db,
-		cfg:       cfg,
-		log:       log,
-		scheduler: scheduler,
+		db:           db,
+		cfg:          cfg,
+		log:          log,
+		scheduler:    scheduler,
+		wizardClient: wizardClient,
 	}
 }
 
 func (s *ManaServiceImpl) TransferMana(ctx context.Context, req *pb.TransferManaRequest) (*pb.TransferManaResponse, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
+	// Use wizard service to handle the transfer
+	transferResp, err := s.wizardClient.TransferMana(ctx, &wizardpb.TransferManaRequest{
+		FromWizardId: req.FromWizardId,
+		ToWizardId:   req.ToWizardId,
+		Amount:       req.Amount,
+		Reason:       "Mana service transfer",
+	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to begin transaction: %v", err)
-	}
-	defer tx.Rollback()
-
-	// Check sender's balance
-	var senderBalance int64
-	err = tx.QueryRowContext(ctx,
-		"SELECT mana_balance FROM wizards WHERE id = $1",
-		req.FromWizardId).Scan(&senderBalance)
-	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "Sender wizard not found: %v", err)
+		s.log.Error("Failed to transfer mana via wizard service", "error", err)
+		return nil, status.Errorf(codes.Internal, "Failed to transfer mana: %v", err)
 	}
 
-	if senderBalance < req.Amount {
-		return nil, status.Errorf(codes.FailedPrecondition, "Insufficient mana balance")
+	if !transferResp.Success {
+		return &pb.TransferManaResponse{Success: false}, nil
 	}
 
-	// Update balances
-	_, err = tx.ExecContext(ctx,
-		"UPDATE wizards SET mana_balance = mana_balance - $1 WHERE id = $2",
-		req.Amount, req.FromWizardId)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to update sender balance: %v", err)
-	}
-
-	_, err = tx.ExecContext(ctx,
-		"UPDATE wizards SET mana_balance = mana_balance + $1 WHERE id = $2",
-		req.Amount, req.ToWizardId)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to update receiver balance: %v", err)
-	}
-
-	// Record transaction
-	_, err = tx.ExecContext(ctx,
+	// Record transaction in mana service database
+	_, err = s.db.ExecContext(ctx,
 		"INSERT INTO mana_transactions (from_wizard_id, to_wizard_id, amount) VALUES ($1, $2, $3)",
 		req.FromWizardId, req.ToWizardId, req.Amount)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to record transaction: %v", err)
-	}
-
-	if err = tx.Commit(); err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to commit transaction: %v", err)
+		s.log.Error("Failed to record mana transaction", "error", err)
+		// Don't fail the entire operation since the transfer succeeded
 	}
 
 	return &pb.TransferManaResponse{Success: true}, nil
@@ -101,23 +99,24 @@ func (s *ManaServiceImpl) CreateInvestment(ctx context.Context, req *pb.CreateIn
 	}
 	defer tx.Rollback()
 
-	// Check wizard's balance
-	var balance int64
-	err = tx.QueryRowContext(ctx,
-		"SELECT mana_balance FROM wizards WHERE id = $1",
-		req.WizardId).Scan(&balance)
+	// Check wizard's balance via wizard service
+	balanceResp, err := s.wizardClient.GetManaBalance(ctx, &wizardpb.GetManaBalanceRequest{
+		WizardId: req.WizardId,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "Wizard not found: %v", err)
 	}
 
-	if balance < req.Amount {
+	if balanceResp.Balance < req.Amount {
 		return nil, status.Errorf(codes.FailedPrecondition, "Insufficient mana balance")
 	}
 
-	// Deduct investment amount
-	_, err = tx.ExecContext(ctx,
-		"UPDATE wizards SET mana_balance = mana_balance - $1 WHERE id = $2",
-		req.Amount, req.WizardId)
+	// Deduct investment amount via wizard service
+	_, err = s.wizardClient.UpdateManaBalance(ctx, &wizardpb.UpdateManaBalanceRequest{
+		WizardId: req.WizardId,
+		Amount:   -req.Amount, // Negative amount to deduct
+		Reason:   "Investment creation",
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to update balance: %v", err)
 	}
@@ -192,5 +191,144 @@ func (s *ManaServiceImpl) GetInvestments(ctx context.Context, req *pb.GetInvestm
 
 	return &pb.GetInvestmentsResponse{
 		Investments: investments,
+	}, nil
+}
+
+func (s *ManaServiceImpl) GetManaBalance(ctx context.Context, req *pb.GetManaBalanceRequest) (*pb.GetManaBalanceResponse, error) {
+	// Get balance from wizard service
+	balanceResp, err := s.wizardClient.GetManaBalance(ctx, &wizardpb.GetManaBalanceRequest{
+		WizardId: req.WizardId,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "Wizard not found: %v", err)
+	}
+
+	return &pb.GetManaBalanceResponse{
+		Balance: balanceResp.Balance,
+	}, nil
+}
+
+func (s *ManaServiceImpl) ListTransactions(ctx context.Context, req *pb.ListTransactionsRequest) (*pb.ListTransactionsResponse, error) {
+	pageSize := req.PageSize
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	
+	pageNumber := req.PageNumber
+	if pageNumber <= 0 {
+		pageNumber = 1
+	}
+	
+	offset := (pageNumber - 1) * pageSize
+
+	// Get total count
+	var totalCount int32
+	err := s.db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM mana_transactions WHERE from_wizard_id = $1 OR to_wizard_id = $1",
+		req.WizardId).Scan(&totalCount)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to count transactions: %v", err)
+	}
+
+	// Get transactions
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT id, from_wizard_id, to_wizard_id, amount, created_at 
+		 FROM mana_transactions 
+		 WHERE from_wizard_id = $1 OR to_wizard_id = $1
+		 ORDER BY created_at DESC
+		 LIMIT $2 OFFSET $3`,
+		req.WizardId, pageSize, offset)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to query transactions: %v", err)
+	}
+	defer rows.Close()
+
+	var transactions []*pb.ManaTransaction
+	for rows.Next() {
+		var tx pb.ManaTransaction
+		var createdAt time.Time
+		
+		err := rows.Scan(
+			&tx.Id,
+			&tx.FromWizardId,
+			&tx.ToWizardId,
+			&tx.Amount,
+			&createdAt,
+		)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Failed to scan transaction: %v", err)
+		}
+
+		tx.CreatedAt = timestamppb.New(createdAt)
+		transactions = append(transactions, &tx)
+	}
+
+	return &pb.ListTransactionsResponse{
+		Transactions: transactions,
+		TotalCount:   totalCount,
+	}, nil
+}
+
+func (s *ManaServiceImpl) GetInvestmentTypes(ctx context.Context, req *pb.GetInvestmentTypesRequest) (*pb.GetInvestmentTypesResponse, error) {
+	query := `SELECT id, name, description, min_amount, max_amount, duration_hours, base_return_rate, risk_level
+	          FROM investment_types WHERE is_active = true`
+	var args []interface{}
+	argCount := 0
+
+	// Add filters if provided
+	if req.MinAmount > 0 {
+		argCount++
+		query += fmt.Sprintf(" AND min_amount >= $%d", argCount)
+		args = append(args, req.MinAmount)
+	}
+	
+	if req.MaxAmount > 0 {
+		argCount++
+		query += fmt.Sprintf(" AND (max_amount IS NULL OR max_amount <= $%d)", argCount)
+		args = append(args, req.MaxAmount)
+	}
+	
+	if req.RiskLevel > 0 {
+		argCount++
+		query += fmt.Sprintf(" AND risk_level = $%d", argCount)
+		args = append(args, req.RiskLevel)
+	}
+
+	query += " ORDER BY risk_level, min_amount"
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to query investment types: %v", err)
+	}
+	defer rows.Close()
+
+	var investmentTypes []*pb.InvestmentType
+	for rows.Next() {
+		var it pb.InvestmentType
+		var maxAmount sql.NullInt64
+		
+		err := rows.Scan(
+			&it.Id,
+			&it.Name,
+			&it.Description,
+			&it.MinAmount,
+			&maxAmount,
+			&it.DurationHours,
+			&it.BaseReturnRate,
+			&it.RiskLevel,
+		)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Failed to scan investment type: %v", err)
+		}
+
+		if maxAmount.Valid {
+			it.MaxAmount = maxAmount.Int64
+		}
+
+		investmentTypes = append(investmentTypes, &it)
+	}
+
+	return &pb.GetInvestmentTypesResponse{
+		InvestmentTypes: investmentTypes,
 	}, nil
 }

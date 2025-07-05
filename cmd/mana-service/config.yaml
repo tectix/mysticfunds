@@ -5,8 +5,8 @@ JWT_SECRET: your_jwt_secret_here
 
 DB_HOST: localhost
 DB_PORT: 5432
-DB_USER: postgres
-DB_PASSWORD: password
+DB_USER: mysticfunds
+DB_PASSWORD: mysticfunds
 DB_NAME: mana
 
 # Investment Configuration
