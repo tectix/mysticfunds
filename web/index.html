@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MysticFunds - Magical Investment Platform</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar" id="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-magic"></i>
+                    <span>MysticFunds</span>
+                </div>
+                <div class="nav-menu" id="nav-menu">
+                    <a href="#" class="nav-link" onclick="showDashboard()">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="#" class="nav-link" onclick="showWizards()">
+                        <i class="fas fa-hat-wizard"></i> My Wizards
+                    </a>
+                    <a href="#" class="nav-link" onclick="showExploreWizards()">
+                        <i class="fas fa-search"></i> Explore
+                    </a>
+                    <a href="#" class="nav-link" onclick="showRealms()">
+                        <i class="fas fa-globe"></i> Realms
+                    </a>
+                    <a href="#" class="nav-link" onclick="showJobs()">
+                        <i class="fas fa-briefcase"></i> Jobs
+                    </a>
+                    <a href="#" class="nav-link" onclick="showMana()">
+                        <i class="fas fa-coins"></i> Mana
+                    </a>
+                    <a href="#" class="nav-link" onclick="showInvestments()">
+                        <i class="fas fa-chart-line"></i> Investments
+                    </a>
+                    <a href="#" class="nav-link" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+                <div class="nav-toggle" id="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Login/Register Modal -->
+        <div id="auth-modal" class="modal">
+            <div class="modal-content">
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <h2 id="auth-title">Welcome to MysticFunds</h2>
+                        <p>Your magical investment journey begins here</p>
+                    </div>
+                    
+                    <div class="auth-tabs">
+                        <button class="tab-button active" onclick="showLogin()">Login</button>
+                        <button class="tab-button" onclick="showRegister()">Register</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="login-form" class="auth-form">
+                        <div class="form-group">
+                            <input type="text" id="login-username" placeholder=" " required>
+                            <label for="login-username">Username</label>
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="login-password" placeholder=" " required>
+                            <label for="login-password">Password</label>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <button type="submit" class="auth-button">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="register-form" class="auth-form" style="display: none;">
+                        <div class="form-group">
+                            <input type="text" id="register-username" placeholder=" " required>
+                            <label for="register-username">Username</label>
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="register-email" placeholder=" " required>
+                            <label for="register-email">Email</label>
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="register-password" placeholder=" " required>
+                            <label for="register-password">Password</label>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <button type="submit" class="auth-button">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content" style="display: none;">
+            <!-- Dashboard -->
+            <div id="dashboard" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-home"></i> Dashboard</h1>
+                    <p>Welcome back, mystical investor!</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-hat-wizard"></i> My Wizards</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-number" id="wizard-count">0</div>
+                            <p>Active Wizards</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-coins"></i> Total Mana</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-number" id="total-mana">0</div>
+                            <p>Mana Balance</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Investments</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-number" id="active-investments">0</div>
+                            <p>Active Investments</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-trophy"></i> Total Returns</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-number" id="total-returns">0</div>
+                            <p>Mana Returns</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-transactions"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizards Page -->
+            <div id="wizards" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-hat-wizard"></i> My Wizards</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="showExploreWizards()">
+                            <i class="fas fa-search"></i> Explore Wizards
+                        </button>
+                        <button class="btn btn-primary" onclick="showCreateWizard()">
+                            <i class="fas fa-plus"></i> Create Wizard
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Active Jobs Section -->
+                <div id="active-jobs-section" class="section-card" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-briefcase"></i> Active Jobs</h2>
+                        <p>Track your wizards' current assignments and earnings</p>
+                    </div>
+                    <div id="active-jobs-grid" class="active-jobs-grid"></div>
+                </div>
+                
+                <div id="wizards-grid" class="wizards-grid"></div>
+            </div>
+
+            <!-- Explore Wizards Page -->
+            <div id="explore-wizards" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-search"></i> Explore Wizards</h1>
+                    <button class="btn btn-secondary" onclick="showWizards()">
+                        <i class="fas fa-arrow-left"></i> Back to My Wizards
+                    </button>
+                </div>
+                
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="realm-filter">Filter by Realm:</label>
+                        <select id="realm-filter" onchange="filterWizardsByRealm()">
+                            <option value="">All Realms</option>
+                            <option value="Pyrrhian Flame">Pyrrhian Flame</option>
+                            <option value="Zepharion Heights">Zepharion Heights</option>
+                            <option value="Terravine Hollow">Terravine Hollow</option>
+                            <option value="Thalorion Depths">Thalorion Depths</option>
+                            <option value="Virelya">Virelya</option>
+                            <option value="Umbros">Umbros</option>
+                            <option value="Nyxthar">Nyxthar</option>
+                            <option value="Aetherion">Aetherion</option>
+                            <option value="Chronarxis">Chronarxis</option>
+                            <option value="Technarok">Technarok</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="explore-wizards-grid" class="wizards-grid"></div>
+            </div>
+
+            <!-- Realms Page -->
+            <div id="realms" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-globe"></i> Mystical Realms</h1>
+                    <p>Discover the ancient realms and their legendary artifacts</p>
+                </div>
+                
+                <div id="realms-grid" class="realms-grid"></div>
+            </div>
+
+            <!-- Jobs Page -->
+            <div id="jobs" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-briefcase"></i> Mystical Jobs</h1>
+                    <p>Discover available jobs across the realms and assign your wizards</p>
+                    <div class="header-actions">
+                        <button id="create-job-btn" class="btn btn-primary" onclick="showCreateJob()" style="display: none;">
+                            <i class="fas fa-plus"></i> Create Job
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="job-realm-filter">Filter by Realm:</label>
+                        <select id="job-realm-filter" onchange="filterJobsByRealm()">
+                            <option value="">All Realms</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="job-element-filter">Filter by Element:</label>
+                        <select id="job-element-filter" onchange="filterJobsByElement()">
+                            <option value="">All Elements</option>
+                            <option value="Fire">Fire</option>
+                            <option value="Air">Air</option>
+                            <option value="Earth">Earth</option>
+                            <option value="Water">Water</option>
+                            <option value="Light">Light</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="job-difficulty-filter">Filter by Difficulty:</label>
+                        <select id="job-difficulty-filter" onchange="filterJobsByDifficulty()">
+                            <option value="">All Difficulties</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Expert">Expert</option>
+                            <option value="Legendary">Legendary</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="jobs-grid" class="jobs-grid"></div>
+            </div>
+
+            <!-- Mana Page -->
+            <div id="mana" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-coins"></i> Mana Management</h1>
+                </div>
+                
+                <div class="mana-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-exchange-alt"></i> Transfer Mana</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="transfer-form">
+                                <div class="form-group select-group">
+                                    <label for="from-wizard">From Wizard</label>
+                                    <select id="from-wizard" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="to-wizard">To Wizard ID</label>
+                                    <input type="number" id="to-wizard" placeholder=" " required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transfer-amount">Amount</label>
+                                    <input type="number" id="transfer-amount" min="1" placeholder=" " required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Transfer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> Transaction History</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group select-group">
+                                <label for="transaction-wizard">Select Wizard</label>
+                                <select id="transaction-wizard" onchange="loadTransactions()">
+                                    <option value="">Select Wizard</option>
+                                </select>
+                            </div>
+                            <div id="transactions-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investments Page -->
+            <div id="investments" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1><i class="fas fa-chart-line"></i> Investments</h1>
+                </div>
+                
+                <div class="investments-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-plus-circle"></i> Create Investment</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="investment-form">
+                                <div class="form-group select-group">
+                                    <label for="investment-wizard">Wizard</label>
+                                    <select id="investment-wizard" required></select>
+                                </div>
+                                <div class="form-group select-group">
+                                    <label for="investment-type">Investment Type</label>
+                                    <select id="investment-type" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="investment-amount">Amount</label>
+                                    <input type="number" id="investment-amount" min="100" placeholder=" " required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-rocket"></i> Invest
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-list"></i> My Investments</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group select-group">
+                                <label for="investments-wizard">Select Wizard</label>
+                                <select id="investments-wizard" onchange="loadInvestments()">
+                                    <option value="">Select Wizard</option>
+                                </select>
+                            </div>
+                            <div id="investments-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Create Wizard Modal -->
+        <div id="create-wizard-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-magic"></i> Create New Wizard</h3>
+                    <span class="close" onclick="closeCreateWizard()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="create-wizard-form">
+                        <div class="form-group">
+                            <label for="wizard-name">Wizard Name</label>
+                            <input type="text" id="wizard-name" placeholder=" " required>
+                        </div>
+                        <div class="form-group select-group">
+                            <label for="wizard-realm">Realm</label>
+                            <select id="wizard-realm" required>
+                                <option value="">Choose Your Realm</option>
+                                <option value="Pyrrhian Flame">Pyrrhian Flame</option>
+                                <option value="Zepharion Heights">Zepharion Heights</option>
+                                <option value="Terravine Hollow">Terravine Hollow</option>
+                                <option value="Thalorion Depths">Thalorion Depths</option>
+                                <option value="Virelya">Virelya</option>
+                                <option value="Umbros">Umbros</option>
+                                <option value="Nyxthar">Nyxthar</option>
+                                <option value="Aetherion">Aetherion</option>
+                                <option value="Chronarxis">Chronarxis</option>
+                                <option value="Technarok">Technarok</option>
+                            </select>
+                        </div>
+                        <div class="form-group select-group">
+                            <label for="wizard-element">Element</label>
+                            <select id="wizard-element" required>
+                                <option value="">Select Element</option>
+                                <option value="Fire">Fire</option>
+                                <option value="Water">Water</option>
+                                <option value="Earth">Earth</option>
+                                <option value="Air">Air</option>
+                                <option value="Light">Light</option>
+                                <option value="Shadow">Shadow</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeCreateWizard()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-wand-magic-sparkles"></i> Create Wizard
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/app.js"></script>
+    
+    <!-- Suppress browser extension errors -->
+    <script>
+        // Suppress chrome extension runtime.lastError messages
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) {
+            // Clear any existing errors
+            chrome.runtime.lastError = undefined;
+        }
+        
+        // Add error handler for uncaught extension errors
+        window.addEventListener('error', function(e) {
+            if (e.message && (e.message.includes('runtime.lastError') || 
+                e.message.includes('message port closed') ||
+                e.message.includes('Extension context invalidated') ||
+                e.message.includes('chrome-extension') ||
+                e.message.includes('moz-extension'))) {
+                e.preventDefault();
+                return true; // Suppress the error
+            }
+        });
+        
+        // Also suppress unhandled promise rejections from extensions
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && e.reason.message && 
+                (e.reason.message.includes('runtime.lastError') ||
+                 e.reason.message.includes('message port closed') ||
+                 e.reason.message.includes('Extension context invalidated'))) {
+                e.preventDefault();
+                return true;
+            }
+        });
+        
+        // Override console.error to filter extension errors
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('runtime.lastError') || 
+                message.includes('message port closed') ||
+                message.includes('Extension context invalidated')) {
+                return; // Don't log extension errors
+            }
+            originalConsoleError.apply(console, args);
+        };
+    </script>
+</body>
+</html>
