@@ -1,0 +1,162 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: mysticfunds-postgres
+    environment:
+      POSTGRES_USER: mysticfunds
+      POSTGRES_PASSWORD: mysticfunds
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mysticfunds"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mysticfunds-network
+
+  # Migration Runner (runs once to set up schemas)
+  migrations:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.migrations
+    container_name: mysticfunds-migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: mysticfunds
+      DB_PASSWORD: mysticfunds
+    networks:
+      - mysticfunds-network
+    restart: "no"
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: cmd/auth-service/Dockerfile
+    container_name: mysticfunds-auth
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: mysticfunds
+      DB_PASSWORD: mysticfunds
+      DB_NAME: auth
+      GRPC_PORT: 50051
+      LOG_LEVEL: info
+      JWT_SECRET: your_jwt_secret_change_in_production
+    ports:
+      - "50051:50051"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50051 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mysticfunds-network
+    restart: unless-stopped
+
+  # Wizard Service
+  wizard-service:
+    build:
+      context: .
+      dockerfile: cmd/wizard-service/Dockerfile
+    container_name: mysticfunds-wizard
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: mysticfunds
+      DB_PASSWORD: mysticfunds
+      DB_NAME: wizard
+      GRPC_PORT: 50052
+      LOG_LEVEL: info
+    ports:
+      - "50052:50052"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50052 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mysticfunds-network
+    restart: unless-stopped
+
+  # Mana Service
+  mana-service:
+    build:
+      context: .
+      dockerfile: cmd/mana-service/Dockerfile
+    container_name: mysticfunds-mana
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: mysticfunds
+      DB_PASSWORD: mysticfunds
+      DB_NAME: mana
+      GRPC_PORT: 50053
+      LOG_LEVEL: info
+    ports:
+      - "50053:50053"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50053 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mysticfunds-network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: cmd/api-gateway/Dockerfile
+    container_name: mysticfunds-gateway
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      wizard-service:
+        condition: service_healthy
+      mana-service:
+        condition: service_healthy
+    environment:
+      HTTP_PORT: 8080
+      LOG_LEVEL: info
+      AUTH_SERVICE_ADDR: auth-service:50051
+      WIZARD_SERVICE_ADDR: wizard-service:50052
+      MANA_SERVICE_ADDR: mana-service:50053
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mysticfunds-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  mysticfunds-network:
+    driver: bridge

@@ -1,0 +1,59 @@
+# Git and version control
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Development files
+.vscode/
+.idea/
+*.log
+logs/
+
+# Build artifacts
+bin/
+**/bin/
+cmd/*/bin/
+
+# Go build cache
+.cache/
+
+# Test files
+*_test.go
+coverage.out
+coverage.html
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+vendor/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+
+# Docker files (avoid recursive copying)
+Dockerfile
+docker-compose.yml
+.dockerignore
