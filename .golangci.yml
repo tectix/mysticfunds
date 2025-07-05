@@ -1,17 +1,112 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  modules-download-mode: readonly
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  govet:
+    check-shadowing: true
+    enable-all: true
+  gocyclo:
+    min-complexity: 15
+  goimports:
+    local-prefixes: github.com/MysticFunds/mysticfunds
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  misspell:
+    locale: US
+  lll:
+    line-length: 120
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+  funlen:
+    lines: 100
+    statements: 50
+
 linters:
+  disable-all: true
   enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
     - errcheck
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gomnd
+    - goprintffuncname
+    - gosec
     - gosimple
     - govet
     - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - rowserrcheck
+    - scopelint
     - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
     - unused
+    - varcheck
+    - whitespace
 
 issues:
   exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - goconst
+        - funlen
+    - path: proto/
+      linters:
+        - all
+    - linters:
+        - lll
+      source: "^//go:generate "
     - linters:
         - staticcheck
       text: "SA1019: grpc.Dial is deprecated"
 
-run:
-  timeout: 5m
+  exclude-use-default: false
+  exclude:
+    - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+  max-issues-per-linter: 50
+  max-same-issues: 3
+
+severity:
+  default-severity: error
+  case-sensitive: false
+  rules:
+    - linters:
+        - dupl
+      severity: info
