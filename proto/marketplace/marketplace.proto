@@ -1,0 +1,278 @@
+syntax = "proto3";
+package marketplace;
+
+option go_package = "github.com/tectix/mysticfunds/proto/marketplace";
+
+import "google/protobuf/timestamp.proto";
+
+service MarketplaceService {
+    // Artifact operations
+    rpc GetArtifacts(GetArtifactsRequest) returns (GetArtifactsResponse) {}
+    rpc GetArtifactsByRealm(GetArtifactsByRealmRequest) returns (GetArtifactsResponse) {}
+    rpc PurchaseArtifact(PurchaseArtifactRequest) returns (PurchaseResponse) {}
+    rpc GetWizardArtifacts(GetWizardArtifactsRequest) returns (GetWizardArtifactsResponse) {}
+    rpc EquipArtifact(EquipArtifactRequest) returns (EquipArtifactResponse) {}
+
+    // Scroll operations
+    rpc GetScrolls(GetScrollsRequest) returns (GetScrollsResponse) {}
+    rpc PurchaseScroll(PurchaseScrollRequest) returns (PurchaseResponse) {}
+    rpc GetWizardScrolls(GetWizardScrollsRequest) returns (GetWizardScrollsResponse) {}
+
+    // Spell operations
+    rpc GetSpells(GetSpellsRequest) returns (GetSpellsResponse) {}
+    rpc GetAvailableTeachers(GetAvailableTeachersRequest) returns (GetAvailableTeachersResponse) {}
+    rpc LearnSpellFromWizard(LearnSpellRequest) returns (LearnSpellResponse) {}
+    rpc OfferSpellTeaching(OfferSpellTeachingRequest) returns (OfferSpellTeachingResponse) {}
+    rpc GetWizardSpells(GetWizardSpellsRequest) returns (GetWizardSpellsResponse) {}
+
+    // Transaction history
+    rpc GetMarketplaceTransactions(GetMarketplaceTransactionsRequest) returns (GetMarketplaceTransactionsResponse) {}
+}
+
+// Artifact messages
+message Artifact {
+    int64 id = 1;
+    int64 realm_id = 2;
+    string realm_name = 3;
+    string name = 4;
+    string description = 5;
+    string lore = 6;
+    int32 power_level = 7;
+    string rarity = 8;
+    int64 mana_cost = 9;
+    string artifact_type = 10;
+    repeated string special_abilities = 11;
+    string requirements = 12;
+    string image_url = 13;
+    bool is_available = 14;
+    google.protobuf.Timestamp created_at = 15;
+}
+
+message WizardArtifact {
+    int64 id = 1;
+    int64 wizard_id = 2;
+    Artifact artifact = 3;
+    google.protobuf.Timestamp acquired_at = 4;
+    bool is_equipped = 5;
+}
+
+message GetArtifactsRequest {
+    string rarity = 1; // Optional filter
+    string artifact_type = 2; // Optional filter
+    int32 max_power_level = 3; // Optional filter
+    int64 max_mana_cost = 4; // Optional filter
+    int32 page_size = 5;
+    int32 page_number = 6;
+}
+
+message GetArtifactsByRealmRequest {
+    int64 realm_id = 1;
+    int32 page_size = 2;
+    int32 page_number = 3;
+}
+
+message GetArtifactsResponse {
+    repeated Artifact artifacts = 1;
+    int64 total_count = 2;
+}
+
+message PurchaseArtifactRequest {
+    int64 wizard_id = 1;
+    int64 artifact_id = 2;
+}
+
+message GetWizardArtifactsRequest {
+    int64 wizard_id = 1;
+}
+
+message GetWizardArtifactsResponse {
+    repeated WizardArtifact artifacts = 1;
+}
+
+message EquipArtifactRequest {
+    int64 wizard_id = 1;
+    int64 artifact_id = 2;
+    bool equip = 3; // true to equip, false to unequip
+}
+
+message EquipArtifactResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Scroll messages
+message Scroll {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    string skill_type = 4;
+    int32 skill_level = 5;
+    int64 mana_cost = 6;
+    repeated string prerequisites = 7;
+    string benefits = 8;
+    string rarity = 9;
+    bool is_available = 10;
+    google.protobuf.Timestamp created_at = 11;
+}
+
+message WizardScroll {
+    int64 id = 1;
+    int64 wizard_id = 2;
+    Scroll scroll = 3;
+    google.protobuf.Timestamp learned_at = 4;
+    int32 mastery_level = 5;
+}
+
+message GetScrollsRequest {
+    string skill_type = 1; // Optional filter
+    string rarity = 2; // Optional filter
+    int32 max_skill_level = 3; // Optional filter
+    int64 max_mana_cost = 4; // Optional filter
+    int32 page_size = 5;
+    int32 page_number = 6;
+}
+
+message GetScrollsResponse {
+    repeated Scroll scrolls = 1;
+    int64 total_count = 2;
+}
+
+message PurchaseScrollRequest {
+    int64 wizard_id = 1;
+    int64 scroll_id = 2;
+}
+
+message GetWizardScrollsRequest {
+    int64 wizard_id = 1;
+}
+
+message GetWizardScrollsResponse {
+    repeated WizardScroll scrolls = 1;
+}
+
+// Spell messages
+message Spell {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    string spell_school = 4;
+    string element = 5; // Optional
+    int32 power_level = 6;
+    int64 mana_cost_to_learn = 7;
+    int32 mana_cost_to_cast = 8;
+    string requirements = 9;
+    string effects = 10;
+    string rarity = 11;
+    google.protobuf.Timestamp created_at = 12;
+}
+
+message WizardSpell {
+    int64 id = 1;
+    int64 wizard_id = 2;
+    Spell spell = 3;
+    google.protobuf.Timestamp learned_at = 4;
+    int64 learned_from_wizard_id = 5; // Optional
+    string learned_from_wizard_name = 6; // Optional
+    int32 mastery_level = 7;
+    int32 times_cast = 8;
+}
+
+message SpellTeacher {
+    int64 wizard_id = 1;
+    string wizard_name = 2;
+    int64 spell_id = 3;
+    Spell spell = 4;
+    int64 teaching_price = 5;
+    int32 max_students = 6; // 0 means unlimited
+    int32 students_taught = 7;
+}
+
+message GetSpellsRequest {
+    string spell_school = 1; // Optional filter
+    string element = 2; // Optional filter
+    string rarity = 3; // Optional filter
+    int32 max_power_level = 4; // Optional filter
+    int64 max_mana_cost = 5; // Optional filter
+    int32 page_size = 6;
+    int32 page_number = 7;
+}
+
+message GetSpellsResponse {
+    repeated Spell spells = 1;
+    int64 total_count = 2;
+}
+
+message GetAvailableTeachersRequest {
+    int64 spell_id = 1;
+    int64 max_price = 2; // Optional filter
+}
+
+message GetAvailableTeachersResponse {
+    repeated SpellTeacher teachers = 1;
+}
+
+message LearnSpellRequest {
+    int64 student_wizard_id = 1;
+    int64 teacher_wizard_id = 2;
+    int64 spell_id = 3;
+}
+
+message LearnSpellResponse {
+    bool success = 1;
+    string message = 2;
+    int64 mana_spent = 3;
+}
+
+message OfferSpellTeachingRequest {
+    int64 wizard_id = 1;
+    int64 spell_id = 2;
+    int64 teaching_price = 3;
+    int32 max_students = 4; // 0 means unlimited
+}
+
+message OfferSpellTeachingResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetWizardSpellsRequest {
+    int64 wizard_id = 1;
+}
+
+message GetWizardSpellsResponse {
+    repeated WizardSpell spells = 1;
+}
+
+// Common messages
+message PurchaseResponse {
+    bool success = 1;
+    string message = 2;
+    int64 mana_spent = 3;
+    int64 remaining_mana = 4;
+}
+
+message MarketplaceTransaction {
+    int64 id = 1;
+    int64 buyer_wizard_id = 2;
+    string buyer_wizard_name = 3;
+    string transaction_type = 4; // "artifact", "scroll", "spell_learning"
+    int64 item_id = 5;
+    string item_name = 6;
+    int64 mana_spent = 7;
+    int64 seller_wizard_id = 8; // Optional, for spell learning
+    string seller_wizard_name = 9; // Optional
+    google.protobuf.Timestamp transaction_date = 10;
+    string notes = 11;
+}
+
+message GetMarketplaceTransactionsRequest {
+    int64 wizard_id = 1; // Optional filter for specific wizard
+    string transaction_type = 2; // Optional filter
+    int32 page_size = 3;
+    int32 page_number = 4;
+}
+
+message GetMarketplaceTransactionsResponse {
+    repeated MarketplaceTransaction transactions = 1;
+    int64 total_count = 2;
+}
