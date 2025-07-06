@@ -12,7 +12,7 @@ The easiest way to get MysticFunds running:
 
 ```bash
 # Clone the repository
-git clone https://github.com/tectix/mysticfunds.git
+git clone https://github.com/Alinoureddine1/mysticfunds.git
 cd mysticfunds
 
 # Start everything with Docker
@@ -25,7 +25,7 @@ docker compose up -d
 
 ```bash
 # Clone the repository
-git clone https://github.com/tectix/mysticfunds.git
+git clone https://github.com/Alinoureddine1/mysticfunds.git
 cd mysticfunds
 
 # Start everything (databases, services, frontend)
@@ -98,21 +98,40 @@ The system will:
 ## Features
 
 ### Current Features
+
+#### Core Systems
 - **User Authentication** - Secure registration, login, logout with JWT
-- **Wizard Management** - Create wizards with different elements and realms
+- **Wizard Management** - Create wizards with 10 different elements and 10 mystical realms
 - **Mana System** - Transfer mana between wizards, track balances
 - **Investment Platform** - Create investments with different risk levels and returns
 - **Portfolio Dashboard** - View stats, recent activity, investment performance
+
+#### Magical World Features
+- **10 Mystical Realms** - Each with unique lore, artifacts, and characteristics
+  - Pyrrhian Flame, Zepharion Heights, Terravine Hollow, Thalorion Depths, Virelya
+  - Umbros, Nyxthar, Aetherion, Chronarxis, Technarok
+- **10 Elemental Schools** - Fire, Water, Earth, Air, Light, Shadow, Spirit, Metal, Time, Void
+- **Jobs System** - 50+ diverse magical jobs across all realms and elements
+- **Marketplace** - Trade artifacts, spells, and enhancement scrolls
+- **Spell Collection** - Learn and cast spells from different magical schools
+- **Guild System** - Join guilds and participate in collaborative activities
+
+#### User Experience
 - **Responsive UI** - Beautiful web interface that works on all devices
+- **Real-time Job Progress** - Live updates on wizard job assignments and earnings
+- **Advanced Filtering** - Element-based filtering for jobs and marketplace items
+- **Wizard Exploration** - Discover other wizards across the realms
 - **Transaction History** - Complete audit trail of all mana movements
-- **Real-time Updates** - Live notifications and balance updates
+- **Interactive Dashboard** - Real-time notifications and balance updates
 
 ### Planned Features
-- **Spell System** - Cast spells using mana
-- **Realm Bonuses** - Element-based investment bonuses
-- **Guild System** - Collaborative investments and shared rewards
+- **Spell Casting System** - Active spell usage with mana costs
+- **Realm Bonuses** - Element-based job and investment bonuses
+- **Advanced Guild Features** - Guild wars, collaborative investments, shared rewards
+- **PvP Arena** - Wizard battles and tournaments
 - **Advanced Analytics** - Portfolio optimization and risk analysis
-- **Gamification** - Achievements, leaderboards, and rewards
+- **Achievements System** - Unlock rewards and titles
+- **Seasonal Events** - Special realm events and limited-time content
 
 ## Prerequisites
 
@@ -338,6 +357,8 @@ mysticfunds/
 ├── logs/                       # Service logs (created at runtime)
 ├── .github/workflows/          # CI/CD pipeline
 ├── .golangci.yml              # Linting configuration
+├── LORE.md                     # Complete world lore and development reference
+├── LICENSE                     # MIT License
 └── Makefile                    # Build automation
 ```
 
@@ -608,7 +629,7 @@ We welcome contributions to MysticFunds! Here's how to get started:
 
 ### 1. Fork & Clone
 ```bash
-git clone https://github.com/tectix/mysticfunds.git
+git clone https://github.com/Alinoureddine1/mysticfunds.git
 cd mysticfunds
 ```
 
@@ -640,14 +661,14 @@ make stop
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License with Commercial Use Restrictions - see the [LICENSE](LICENSE) file for details.
 
 ## Support & Community
 
-- **Bug Reports** - [GitHub Issues](https://github.com/tectix/mysticfunds/issues)
-- **Feature Requests** - [GitHub Discussions](https://github.com/tectix/mysticfunds/discussions)
+- **Bug Reports** - [GitHub Issues](https://github.com/Alinoureddine1/mysticfunds/issues)
+- **Feature Requests** - [GitHub Discussions](https://github.com/Alinoureddine1/mysticfunds/discussions)
 - **Documentation** - This README and inline code comments
-- **Community** - [Discussions](https://github.com/tectix/mysticfunds/discussions)
+- **Community** - [Discussions](https://github.com/Alinoureddine1/mysticfunds/discussions)
 
 ## Getting Started Guide
 
@@ -680,12 +701,50 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
    - Enter recipient wizard ID and amount
 
 ### Demo Data
-The system starts with some pre-configured investment types:
+The system starts with rich pre-configured content:
+
+#### Investment Types
 - **Crystal Mining** - Low risk, steady returns
 - **Dragon Trading** - Medium risk, good returns  
 - **Arcane Ventures** - High risk, high rewards
 
+#### Sample Wizards (27 lore-friendly characters)
+- Wizards from all 10 realms with authentic magical names
+- Various experience levels and specializations
+- Complete with guild affiliations and backstories
+
+#### Jobs (50+ available)
+- **4+ jobs per element** across all 10 elemental schools
+- Difficulty ranges from Easy to Legendary
+- Diverse job types: Research, Combat, Maintenance, Diplomacy, etc.
+- Authentic magical locations and requirements
+
+#### Marketplace Items
+- **Artifacts** - Magical weapons, armor, and accessories with passive effects
+- **Spells** - Learnable magic from different schools and elements  
+- **Enhancement Scrolls** - Boost wizard abilities and skills
+- **Lore-friendly descriptions** and realm-specific origins
+
+---
+
+## World Lore & Development
+
+MysticFunds includes a rich fantasy world with deep lore and consistent magical systems. For detailed information about the realms, elements, guilds, and development guidelines, see [LORE.md](LORE.md).
+
+### Quick Lore Reference
+- **10 Mystical Realms** - From volcanic Pyrrhian Flame to void-touched Nyxthar
+- **10 Elemental Schools** - Complete magical system with unique characteristics
+- **Rich Guild System** - Organizations spanning all realms with unique purposes
+- **Consistent Naming** - Lore-friendly names and descriptions throughout
+- **Development Guidelines** - Color schemes, naming conventions, and game mechanics
+
 ---
 
 *May your investments be ever magical!*
+
+## About
+
+**MysticFunds** is a passion project created by [Ali Noureddine](https://github.com/Alinoureddine1) - a magical investment platform that combines modern web development with rich fantasy world-building.
+
+**License**: MIT License with Commercial Use Restrictions - see [LICENSE](LICENSE) file for details.
 
