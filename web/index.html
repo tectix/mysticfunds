@@ -18,28 +18,32 @@
                 </div>
                 <div class="nav-menu" id="nav-menu">
                     <a href="#" class="nav-link" onclick="showDashboard()">
-                        <i class="fas fa-home"></i> Dashboard
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
                     </a>
                     <a href="#" class="nav-link" onclick="showWizards()">
-                        <i class="fas fa-hat-wizard"></i> My Wizards
+                        <i class="fas fa-hat-wizard"></i>
+                        <span>Wizards</span>
                     </a>
-                    <a href="#" class="nav-link" onclick="showExploreWizards()">
-                        <i class="fas fa-search"></i> Explore
-                    </a>
-                    <a href="#" class="nav-link" onclick="showRealms()">
-                        <i class="fas fa-globe"></i> Realms
+                    <a href="#" class="nav-link" onclick="showMarketplace()">
+                        <i class="fas fa-store"></i>
+                        <span>Marketplace</span>
                     </a>
                     <a href="#" class="nav-link" onclick="showJobs()">
-                        <i class="fas fa-briefcase"></i> Jobs
+                        <i class="fas fa-briefcase"></i>
+                        <span>Jobs</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="showRealms()">
+                        <i class="fas fa-globe"></i>
+                        <span>Realms</span>
                     </a>
                     <a href="#" class="nav-link" onclick="showMana()">
-                        <i class="fas fa-coins"></i> Mana
-                    </a>
-                    <a href="#" class="nav-link" onclick="showInvestments()">
-                        <i class="fas fa-chart-line"></i> Investments
+                        <i class="fas fa-coins"></i>
+                        <span>Mana</span>
                     </a>
                     <a href="#" class="nav-link" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
                     </a>
                 </div>
                 <div class="nav-toggle" id="nav-toggle">
@@ -236,48 +240,184 @@
 
             <!-- Jobs Page -->
             <div id="jobs" class="page" style="display: none;">
-                <div class="page-header">
-                    <h1><i class="fas fa-briefcase"></i> Mystical Jobs</h1>
-                    <p>Discover available jobs across the realms and assign your wizards</p>
-                    <div class="header-actions">
-                        <button id="create-job-btn" class="btn btn-primary" onclick="showCreateJob()" style="display: none;">
-                            <i class="fas fa-plus"></i> Create Job
-                        </button>
+                <div class="jobs-container">
+                    <div class="jobs-header">
+                        <h1><i class="fas fa-briefcase"></i> Mystical Jobs</h1>
+                        <p>Discover available jobs across the realms and assign your wizards</p>
+                    </div>
+                    
+                    <div class="jobs-content">
+                        <div class="jobs-sidebar">
+                            <div class="jobs-filters">
+                                <h3>Filters</h3>
+                                <div class="filter-section">
+                                    <label>Realm</label>
+                                    <select id="job-realm-filter" onchange="filterJobsByRealm()">
+                                        <option value="">All Realms</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-section">
+                                    <label>Element</label>
+                                    <select id="job-element-filter">
+                                        <option value="">All Elements</option>
+                                        <option value="Fire">Fire</option>
+                                        <option value="Water">Water</option>
+                                        <option value="Earth">Earth</option>
+                                        <option value="Air">Air</option>
+                                        <option value="Light">Light</option>
+                                        <option value="Shadow">Shadow</option>
+                                        <option value="Spirit">Spirit</option>
+                                        <option value="Metal">Metal</option>
+                                        <option value="Time">Time</option>
+                                        <option value="Void">Void</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-section">
+                                    <label>Difficulty</label>
+                                    <div class="filter-options">
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="Easy">
+                                            <span class="difficulty-easy">Easy</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="Medium">
+                                            <span class="difficulty-medium">Medium</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="Hard">
+                                            <span class="difficulty-hard">Hard</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="Expert">
+                                            <span class="difficulty-expert">Expert</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="Legendary">
+                                            <span class="difficulty-legendary">Legendary</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="jobs-main">
+                            <div class="jobs-section-header">
+                                <h2>Available Jobs</h2>
+                                <div class="jobs-controls">
+                                    <div class="search-box">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" placeholder="Search jobs..." id="jobs-search">
+                                    </div>
+                                    <select class="sort-select" id="jobs-sort">
+                                        <option value="difficulty">Difficulty</option>
+                                        <option value="duration">Duration</option>
+                                        <option value="name">Name</option>
+                                    </select>
+                                    <button id="create-job-btn" class="btn btn-primary" onclick="showCreateJob()" style="display: none;">
+                                        <i class="fas fa-plus"></i> Create Job
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="jobs-grid" id="jobs-grid">
+                                <!-- Jobs will be loaded here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="filters-section">
-                    <div class="filter-group">
-                        <label for="job-realm-filter">Filter by Realm:</label>
-                        <select id="job-realm-filter" onchange="filterJobsByRealm()">
-                            <option value="">All Realms</option>
-                        </select>
+            </div>
+
+            <!-- Marketplace Page -->
+            <div id="marketplace" class="page" style="display: none;">
+                <div class="marketplace-container">
+                    <div class="marketplace-header">
+                        <h1><i class="fas fa-store"></i> Marketplace</h1>
+                        <p>Discover and trade magical items</p>
                     </div>
-                    <div class="filter-group">
-                        <label for="job-element-filter">Filter by Element:</label>
-                        <select id="job-element-filter" onchange="filterJobsByElement()">
-                            <option value="">All Elements</option>
-                            <option value="Fire">Fire</option>
-                            <option value="Air">Air</option>
-                            <option value="Earth">Earth</option>
-                            <option value="Water">Water</option>
-                            <option value="Light">Light</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="job-difficulty-filter">Filter by Difficulty:</label>
-                        <select id="job-difficulty-filter" onchange="filterJobsByDifficulty()">
-                            <option value="">All Difficulties</option>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                            <option value="Expert">Expert</option>
-                            <option value="Legendary">Legendary</option>
-                        </select>
+                    
+                    <div class="marketplace-content">
+                        <div class="marketplace-sidebar">
+                            <div class="marketplace-nav">
+                                <button class="marketplace-nav-item active" onclick="showMarketplaceSection('artifacts')">
+                                    <i class="fas fa-gem"></i>
+                                    <span>Artifacts</span>
+                                </button>
+                                <button class="marketplace-nav-item" onclick="showMarketplaceSection('spells')">
+                                    <i class="fas fa-magic"></i>
+                                    <span>Spells</span>
+                                </button>
+                                <button class="marketplace-nav-item" onclick="showMarketplaceSection('scrolls')">
+                                    <i class="fas fa-scroll"></i>
+                                    <span>Scrolls</span>
+                                </button>
+                            </div>
+                            
+                            <div class="marketplace-filters">
+                                <h3>Filters</h3>
+                                <div class="filter-section">
+                                    <label>Rarity</label>
+                                    <div class="filter-options">
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="common">
+                                            <span class="rarity-common">Common</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="uncommon">
+                                            <span class="rarity-uncommon">Uncommon</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="rare">
+                                            <span class="rarity-rare">Rare</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="epic">
+                                            <span class="rarity-epic">Epic</span>
+                                        </label>
+                                        <label class="filter-option">
+                                            <input type="checkbox" value="legendary">
+                                            <span class="rarity-legendary">Legendary</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section">
+                                    <label>Price Range</label>
+                                    <div class="price-range">
+                                        <input type="number" placeholder="Min" id="price-min">
+                                        <span>to</span>
+                                        <input type="number" placeholder="Max" id="price-max">
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="marketplace-main">
+                            <div class="marketplace-section-header">
+                                <h2 id="marketplace-section-title">Artifacts</h2>
+                                <div class="marketplace-controls">
+                                    <div class="search-box">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" placeholder="Search items..." id="marketplace-search">
+                                    </div>
+                                    <select class="sort-select" id="marketplace-sort">
+                                        <option value="name">Sort by Name</option>
+                                        <option value="price-low">Price: Low to High</option>
+                                        <option value="price-high">Price: High to Low</option>
+                                        <option value="rarity">Rarity</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="marketplace-grid" id="marketplace-items-grid">
+                                <!-- Items will be loaded here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div id="jobs-grid" class="jobs-grid"></div>
             </div>
 
             <!-- Mana Page -->
@@ -418,6 +558,10 @@
                                 <option value="Air">Air</option>
                                 <option value="Light">Light</option>
                                 <option value="Shadow">Shadow</option>
+                                <option value="Void">Void</option>
+                                <option value="Spirit">Spirit</option>
+                                <option value="Time">Time</option>
+                                <option value="Metal">Metal</option>
                             </select>
                         </div>
                         <div class="form-actions">
@@ -434,6 +578,68 @@
         <!-- Loading Spinner -->
         <div id="loading" class="loading" style="display: none;">
             <div class="spinner"></div>
+        </div>
+
+        <!-- Wizard Detail Modal -->
+        <div id="wizard-detail-modal" class="modal">
+            <div class="modal-content wizard-modal">
+                <div class="modal-header wizard-modal-header">
+                    <div class="wizard-modal-avatar">
+                        <i class="fas fa-hat-wizard"></i>
+                    </div>
+                    <div class="wizard-modal-info">
+                        <h2 id="modal-wizard-name">Wizard Name</h2>
+                        <div class="wizard-modal-details">
+                            <span id="modal-wizard-realm"><i class="fas fa-globe"></i> Realm</span>
+                            <span id="modal-wizard-element"><i class="fas fa-magic"></i> Element</span>
+                            <span id="modal-wizard-level"><i class="fas fa-star"></i> Level 1</span>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeWizardModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="wizard-modal-stats">
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Mana Balance</div>
+                            <div class="modal-stat-value" id="modal-wizard-mana">0</div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Experience</div>
+                            <div class="modal-stat-value" id="modal-wizard-exp">0</div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Total Items</div>
+                            <div class="modal-stat-value" id="modal-wizard-items">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-inventory-section">
+                        <h3><i class="fas fa-gem"></i> Equipped Artifacts</h3>
+                        <div id="modal-wizard-artifacts" class="inventory-grid">
+                            <!-- Artifacts will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-inventory-section">
+                        <h3><i class="fas fa-scroll"></i> Known Spells</h3>
+                        <div id="modal-wizard-spells" class="inventory-grid">
+                            <!-- Spells will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-modal-actions">
+                        <button class="btn btn-primary" onclick="transferManaTo(currentWizardId)">
+                            <i class="fas fa-paper-plane"></i> Transfer Mana
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeWizardModal()">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Toast Notifications -->

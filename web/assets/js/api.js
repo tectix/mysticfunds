@@ -315,6 +315,15 @@ class ApiClient {
     async getRealms() {
         return this.request('/realms');
     }
+
+    // Marketplace API calls - Basic methods for wizard collections
+    async getWizardArtifacts(wizardId) {
+        return this.request(`/marketplace/artifacts/wizard/${wizardId}`);
+    }
+
+    async getWizardSpells(wizardId) {
+        return this.request(`/marketplace/spells/wizard/${wizardId}`);
+    }
 }
 
 // Global API client instance
