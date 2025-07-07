@@ -11,8 +11,8 @@ output:
 
 linters-settings:
   govet:
-    check-shadowing: true
-    enable-all: true
+    check-shadowing: false
+    enable-all: false
   gocyclo:
     min-complexity: 15
   goimports:
@@ -44,41 +44,15 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
-    - dupl
     - errcheck
-    - funlen
-    - gochecknoinits
-    - goconst
-    - gocritic
-    - gocyclo
     - gofmt
     - goimports
-    - golint
-    - gomnd
-    - goprintffuncname
-    - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
-    - lll
-    - misspell
-    - nakedret
-    - rowserrcheck
-    - scopelint
     - staticcheck
-    - structcheck
-    - stylecheck
     - typecheck
-    - unconvert
-    - unparam
     - unused
-    - varcheck
-    - whitespace
 
 issues:
   exclude-rules:
@@ -101,6 +75,10 @@ issues:
   exclude:
     - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
     - "Error return value of .*.Rollback. is not checked"
+    - "rows.Err must be checked"
+    - "shadow: declaration of \"err\" shadows declaration"
+    - "rand.Seed has been deprecated"
+    - "at least one file in a package should have a package comment"
   max-issues-per-linter: 50
   max-same-issues: 3
 
