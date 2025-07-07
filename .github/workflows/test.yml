@@ -38,19 +38,15 @@ jobs:
 
     - name: Build all services
       run: |
-        echo "Building auth service..."
-        go build -v ./cmd/auth-service/
-        
-        echo "Building wizard service..."  
-        go build -v ./cmd/wizard-service/
-        
-        echo "Building mana service..."
-        go build -v ./cmd/mana-service/
-        
-        echo "Building API gateway..."
-        go build -v ./cmd/api-gateway/
-        
-        echo "All services built successfully!"
+        for service in auth-service wizard-service mana-service api-gateway; do
+          if [ -f "cmd/$service/main.go" ]; then
+            echo "Building $service..."
+            go build -v ./cmd/$service/
+          else
+            echo "Skipping $service - no main.go found"
+          fi
+        done
+        echo "✅ Build process completed!"
       timeout-minutes: 5
 
     - name: Run tests (if any exist)

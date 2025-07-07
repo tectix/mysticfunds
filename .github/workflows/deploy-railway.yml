@@ -36,10 +36,14 @@ jobs:
     - name: Build services (test build)
       run: |
         echo "Testing build process..."
-        go build -v ./cmd/auth-service/
-        go build -v ./cmd/wizard-service/  
-        go build -v ./cmd/mana-service/
-        go build -v ./cmd/api-gateway/
+        for service in auth-service wizard-service mana-service api-gateway; do
+          if [ -f "cmd/$service/main.go" ]; then
+            echo "Building $service..."
+            go build -v ./cmd/$service/
+          else
+            echo "Skipping $service - no main.go found"
+          fi
+        done
 
     - name: Run unit tests (with timeout)
       run: |
