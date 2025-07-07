@@ -1,0 +1,47 @@
+name: Deploy Frontend to Vercel
+
+# Trigger deployment on push to dev branch (frontend changes)
+on:
+  push:
+    branches: [ dev ]
+    paths: 
+      - 'web/**'
+      - 'vercel.json'
+      - '.vercelignore'
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Vercel CLI
+      run: npm install -g vercel
+
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts
+      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy Project Artifacts to Vercel
+      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Frontend Health Check
+      run: |
+        echo "Waiting for frontend deployment..."
+        sleep 30
+        VERCEL_URL=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | grep mysticfunds | head -1 | awk '{print $2}')
+        curl -f "https://${VERCEL_URL}" || exit 1
+        echo "Frontend deployment successful!"

@@ -2,6 +2,70 @@
 let wizards = [];
 let investmentTypes = [];
 
+// Global error handling and fallbacks
+class ErrorHandler {
+    static handle(error, context = '') {
+        console.error(`Error in ${context}:`, error);
+        
+        // Determine error severity and type
+        let message = 'An unexpected error occurred';
+        let isNetworkError = false;
+        
+        if (error.message) {
+            if (error.message.includes('fetch') || error.message.includes('network')) {
+                isNetworkError = true;
+                message = 'Network error. Please check your connection and try again.';
+            } else if (error.message.includes('401') || error.message.includes('log in')) {
+                message = 'Your session has expired. Please log in again.';
+            } else {
+                message = error.message;
+            }
+        }
+        
+        // Show user-friendly error
+        if (typeof showToast === 'function') {
+            showToast(message, 'error');
+        }
+        
+        // For network errors, try to handle gracefully
+        if (isNetworkError) {
+            this.handleNetworkError(context);
+        }
+        
+        return { message, isNetworkError };
+    }
+    
+    static handleNetworkError(context) {
+        // Show offline indicator or fallback content
+        console.log(`Network error in ${context}, showing fallback`);
+        
+        // Hide loading states
+        if (typeof showLoading === 'function') {
+            showLoading(false);
+        }
+    }
+    
+    static wrapAsync(asyncFunction, context = '') {
+        return async (...args) => {
+            try {
+                return await asyncFunction(...args);
+            } catch (error) {
+                this.handle(error, context);
+                throw error;
+            }
+        };
+    }
+}
+
+// Global error boundary for unhandled errors
+window.addEventListener('error', (event) => {
+    ErrorHandler.handle(event.error, 'Global');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    ErrorHandler.handle(event.reason, 'Promise rejection');
+});
+
 // Utility Functions
 function showLoading(show) {
     document.getElementById('loading').style.display = show ? 'flex' : 'none';
@@ -225,54 +289,151 @@ function getSampleSpells(wizard) {
     return spells;
 }
 
-// Navigation Functions
+// Enhanced Navigation System with URL Routing
+class Router {
+    constructor() {
+        this.routes = new Map();
+        this.currentPage = null;
+        this.init();
+    }
+
+    init() {
+        // Handle browser back/forward
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.page) {
+                this.showPage(e.state.page, false);
+            } else {
+                this.showPage('dashboard', false);
+            }
+        });
+
+        // Handle initial page load
+        this.handleInitialRoute();
+    }
+
+    register(pageId, loadFunction) {
+        this.routes.set(pageId, loadFunction);
+    }
+
+    handleInitialRoute() {
+        const hash = window.location.hash.slice(1) || 'dashboard';
+        this.showPage(hash, false);
+    }
+
+    showPage(pageId, pushState = true) {
+        // Validate page exists
+        if (!document.getElementById(pageId)) {
+            pageId = 'dashboard';
+        }
+
+        // Update URL if needed
+        if (pushState && this.currentPage !== pageId) {
+            const url = pageId === 'dashboard' ? '#' : `#${pageId}`;
+            history.pushState({ page: pageId }, '', url);
+        }
+
+        // Hide all pages
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(page => page.style.display = 'none');
+        
+        // Show selected page
+        document.getElementById(pageId).style.display = 'block';
+        
+        // Update active nav link
+        this.updateActiveNavLink(pageId);
+        
+        // Load page content
+        const loadFunction = this.routes.get(pageId);
+        if (loadFunction) {
+            loadFunction();
+        }
+
+        this.currentPage = pageId;
+    }
+
+    updateActiveNavLink(pageId) {
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('onclick')?.includes(pageId) || 
+                link.getAttribute('href') === `#${pageId}`) {
+                link.classList.add('active');
+            }
+        });
+    }
+}
+
+// Global router instance
+const router = new Router();
+
+// Legacy function for backward compatibility
 function showPage(pageId) {
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.style.display = 'none');
-    
-    // Show selected page
-    document.getElementById(pageId).style.display = 'block';
-    
-    // Update active nav link
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => link.classList.remove('active'));
+    router.showPage(pageId);
 }
 
 function showDashboard() {
-    showPage('dashboard');
-    loadDashboardStats();
-    loadRecentActivity();
+    router.showPage('dashboard');
 }
 
 function showWizards() {
-    showPage('wizards');
-    loadWizards();
-    loadActiveJobs();
+    router.showPage('wizards');
 }
 
 function showMana() {
-    showPage('mana');
-    loadWizardSelectors();
+    router.showPage('mana');
 }
 
 function showInvestments() {
-    showPage('investments');
-    loadWizardSelectors();
-    loadInvestmentTypes();
+    router.showPage('investments');
 }
 
 function showJobs() {
-    showPage('jobs');
-    loadJobs();
-    loadJobFilters();
-    checkJobCreationAccess();
-    setupJobsEventListeners();
+    router.showPage('jobs');
 }
 
 function showMarketplace() {
-    showPage('marketplace');
-    loadMarketplace();
+    router.showPage('marketplace');
+}
+
+// Register all routes with their load functions
+function initializeRoutes() {
+    router.register('dashboard', () => {
+        loadDashboardStats();
+        loadRecentActivity();
+    });
+
+    router.register('wizards', () => {
+        loadWizards();
+        loadActiveJobs();
+    });
+
+    router.register('mana', () => {
+        loadWizardSelectors();
+    });
+
+    router.register('investments', () => {
+        loadWizardSelectors();
+        loadInvestmentTypes();
+    });
+
+    router.register('jobs', () => {
+        loadJobs();
+        loadJobFilters();
+        checkJobCreationAccess();
+        setupJobsEventListeners();
+    });
+
+    router.register('marketplace', () => {
+        loadMarketplace();
+    });
+
+    router.register('explore-wizards', () => {
+        loadExploreWizards();
+    });
+
+    router.register('realms', () => {
+        loadRealms();
+    });
 }
 
 function checkJobCreationAccess() {
@@ -3265,8 +3426,77 @@ function getSpellSchoolColor(school) {
     }
 }
 
-// Simple page initialization
+// Application health monitoring
+class HealthMonitor {
+    constructor() {
+        this.isOnline = navigator.onLine;
+        this.lastHealthCheck = null;
+        this.healthCheckInterval = null;
+        this.init();
+    }
+
+    init() {
+        // Monitor online/offline status
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            console.log('Application back online');
+            showToast('Connection restored', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+            console.log('Application offline');
+            showToast('Connection lost. Some features may not work.', 'warning');
+        });
+
+        // Start periodic health checks in production
+        if (window.location.hostname !== 'localhost') {
+            this.startHealthChecks();
+        }
+    }
+
+    startHealthChecks() {
+        this.healthCheckInterval = setInterval(() => {
+            this.performHealthCheck();
+        }, 300000); // Check every 5 minutes
+    }
+
+    async performHealthCheck() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`, {
+                method: 'GET',
+                timeout: 5000
+            });
+            this.lastHealthCheck = new Date();
+            if (!response.ok) {
+                console.warn('Health check failed:', response.status);
+            }
+        } catch (error) {
+            console.warn('Health check error:', error);
+        }
+    }
+
+    stop() {
+        if (this.healthCheckInterval) {
+            clearInterval(this.healthCheckInterval);
+        }
+    }
+}
+
+// Global health monitor
+const healthMonitor = new HealthMonitor();
+
+// Enhanced page initialization
 document.addEventListener('DOMContentLoaded', function() {
     console.log('MysticFunds app loaded');
+    
+    // Initialize routing system
+    initializeRoutes();
+    
+    // Start background refresh for active jobs
     startActiveJobsRefresh();
+    
+    // Log deployment environment
+    console.log('Environment:', window.location.hostname === 'localhost' ? 'Development' : 'Production');
+    console.log('API Base URL:', API_BASE_URL);
 });

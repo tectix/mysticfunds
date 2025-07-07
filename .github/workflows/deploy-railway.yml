@@ -1,0 +1,60 @@
+name: Deploy to Railway
+
+# Trigger deployment on push to dev branch
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Run tests
+      run: |
+        go mod download
+        go test ./...
+
+    - name: Install Railway CLI
+      run: |
+        npm install -g @railway/cli
+
+    - name: Deploy to Railway
+      run: |
+        railway login --token $RAILWAY_TOKEN
+        railway up --detach
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+    - name: Wait for deployment
+      run: |
+        echo "Waiting for deployment to complete..."
+        sleep 60
+        
+    - name: Health check
+      run: |
+        # Get the Railway domain and check health
+        RAILWAY_URL=$(railway domain)
+        curl -f "${RAILWAY_URL}/health" || exit 1
+        echo "Deployment successful and healthy!"

@@ -1,0 +1,24 @@
+# Ignore Go backend files
+cmd/
+internal/
+pkg/
+proto/
+migrations/
+go.mod
+go.sum
+Makefile
+.golangci.yml
+
+# Ignore logs and binaries
+logs/
+*.log
+bin/
+auth/
+mana/
+spell/
+wizard/
+
+# Keep only web frontend
+!web/
+!vercel.json
+!.vercelignore

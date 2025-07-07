@@ -85,3 +85,20 @@ docker-compose.override.yml
 
 # Claude Code memory files
 .claude
+
+# Railway and Vercel deployment files
+.railway/
+.vercel/
+
+# Additional secret files
+secrets/
+*.key
+*.pem
+*.p12
+*.p8
+
+# Service directories that may be created
+auth/
+wizard/
+mana/
+spell/

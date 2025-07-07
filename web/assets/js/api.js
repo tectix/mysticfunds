@@ -1,23 +1,90 @@
-// API Configuration - v1.1 with getRealms support
-const API_BASE_URL = 'http://localhost:8080/api';
+// API Configuration - Environment-aware with enhanced session management
+function getApiBaseUrl() {
+    // Auto-detect API URL based on environment
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8080/api';
+    }
+    
+    // For Vercel deployment, API calls are proxied through Vercel
+    if (window.location.hostname.includes('vercel.app')) {
+        return `${window.location.protocol}//${window.location.host}/api`;
+    }
+    
+    // For production, use same origin
+    return `${window.location.protocol}//${window.location.host}/api`;
+}
 
-// API Client Class
+const API_BASE_URL = getApiBaseUrl();
+
+// Enhanced API Client Class with session management
 class ApiClient {
     constructor() {
         this.token = localStorage.getItem('auth_token');
+        this.tokenExpiry = localStorage.getItem('auth_token_expiry');
+        this.refreshAttempted = false;
+        
         // Clean up invalid tokens
         if (this.token === 'null' || this.token === 'undefined' || this.token === '') {
-            this.token = null;
-            localStorage.removeItem('auth_token');
+            this.clearToken();
         }
+        
+        // Check token expiry
+        this.checkTokenExpiry();
     }
 
-    setToken(token) {
+    setToken(token, expiryHours = 24) {
         this.token = token;
         if (token) {
             localStorage.setItem('auth_token', token);
+            // Set token expiry (default 24 hours)
+            const expiry = new Date();
+            expiry.setHours(expiry.getHours() + expiryHours);
+            this.tokenExpiry = expiry.toISOString();
+            localStorage.setItem('auth_token_expiry', this.tokenExpiry);
         } else {
-            localStorage.removeItem('auth_token');
+            this.clearToken();
+        }
+    }
+
+    clearToken() {
+        this.token = null;
+        this.tokenExpiry = null;
+        this.refreshAttempted = false;
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_token_expiry');
+    }
+
+    checkTokenExpiry() {
+        if (!this.token || !this.tokenExpiry) return;
+        
+        const now = new Date();
+        const expiry = new Date(this.tokenExpiry);
+        
+        // If token expires in less than 1 hour, try to refresh
+        const oneHour = 60 * 60 * 1000;
+        if ((expiry.getTime() - now.getTime()) < oneHour && !this.refreshAttempted) {
+            this.attemptTokenRefresh();
+        }
+        
+        // If token is expired, clear it
+        if (now >= expiry) {
+            this.clearToken();
+        }
+    }
+
+    async attemptTokenRefresh() {
+        if (this.refreshAttempted || !this.token) return;
+        
+        this.refreshAttempted = true;
+        try {
+            const result = await this.refreshToken();
+            if (result && result.token) {
+                this.setToken(result.token);
+                console.log('Token refreshed successfully');
+            }
+        } catch (error) {
+            console.warn('Token refresh failed:', error.message);
+            // Don't clear token here, let it expire naturally
         }
     }
 
@@ -31,7 +98,10 @@ class ApiClient {
         return headers;
     }
 
-    async request(endpoint, options = {}) {
+    async request(endpoint, options = {}, retryCount = 0) {
+        // Check token expiry before making request
+        this.checkTokenExpiry();
+        
         const url = `${API_BASE_URL}${endpoint}`;
         const config = {
             ...options,
@@ -48,9 +118,22 @@ class ApiClient {
             const responseClone = response.clone();
             
             if (!response.ok) {
-                if (response.status === 401) {
-                    this.setToken(null);
-                    showAuthModal();
+                if (response.status === 401 && retryCount === 0 && this.token) {
+                    // Try to refresh token once
+                    try {
+                        await this.attemptTokenRefresh();
+                        if (this.token) {
+                            // Retry the request with new token
+                            return this.request(endpoint, options, retryCount + 1);
+                        }
+                    } catch (refreshError) {
+                        console.warn('Token refresh failed during request:', refreshError);
+                    }
+                    // If refresh fails or no token, proceed with auth error
+                    this.clearToken();
+                    if (typeof showAuthModal === 'function') {
+                        showAuthModal();
+                    }
                     throw new Error('Please log in to continue');
                 }
                 
