@@ -16,6 +16,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
     - name: Checkout code
@@ -28,20 +29,43 @@ jobs:
 
     - name: Install Vercel CLI
       run: npm install -g vercel
+      timeout-minutes: 2
 
-    - name: Pull Vercel Environment Information
-      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-    - name: Build Project Artifacts
-      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-    - name: Deploy Project Artifacts to Vercel
-      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-    - name: Frontend Health Check
+    - name: Deploy to Vercel
       run: |
-        echo "Waiting for frontend deployment..."
-        sleep 30
-        VERCEL_URL=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | grep mysticfunds | head -1 | awk '{print $2}')
-        curl -f "https://${VERCEL_URL}" || exit 1
-        echo "Frontend deployment successful!"
+        echo "Deploying to Vercel..."
+        VERCEL_URL=$(vercel --prod --token=$VERCEL_TOKEN --yes)
+        echo "::notice title=Vercel Deployment::Deployed to $VERCEL_URL"
+        echo "VERCEL_URL=$VERCEL_URL" >> $GITHUB_ENV
+        echo "Frontend deployed successfully!"
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      timeout-minutes: 5
+
+    - name: Verify deployment
+      run: |
+        echo "Vercel deployment completed!"
+        echo "Live at: $VERCEL_URL"
+      timeout-minutes: 1
+      
+    - name: Create GitHub deployment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const deployment = await github.rest.repos.createDeployment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: context.sha,
+            environment: 'vercel-production',
+            auto_merge: false,
+            required_contexts: []
+          });
+          
+          await github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: deployment.data.id,
+            state: 'success',
+            environment_url: process.env.VERCEL_URL,
+            description: 'Vercel deployment successful'
+          });

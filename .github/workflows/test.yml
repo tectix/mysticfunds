@@ -1,0 +1,88 @@
+name: Test Build
+
+# Run tests on PRs and non-dev pushes
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ main, feature/** ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Download dependencies
+      run: go mod download
+      timeout-minutes: 3
+
+    - name: Verify Go modules
+      run: go mod verify
+
+    - name: Build all services
+      run: |
+        echo "Building auth service..."
+        go build -v ./cmd/auth-service/
+        
+        echo "Building wizard service..."  
+        go build -v ./cmd/wizard-service/
+        
+        echo "Building mana service..."
+        go build -v ./cmd/mana-service/
+        
+        echo "Building API gateway..."
+        go build -v ./cmd/api-gateway/
+        
+        echo "All services built successfully!"
+      timeout-minutes: 5
+
+    - name: Run tests (if any exist)
+      run: |
+        echo "Checking for test files..."
+        if find . -name "*_test.go" -type f | head -1 | grep -q .; then
+          echo "Running tests..."
+          go test -v -timeout=30s ./...
+        else
+          echo "No test files found - skipping tests"
+          echo "Consider adding tests to improve code quality!"
+        fi
+      timeout-minutes: 3
+
+    - name: Check code formatting
+      run: |
+        echo "Checking Go code formatting..."
+        if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+          echo "The following files are not properly formatted:"
+          gofmt -l .
+          echo "Run 'go fmt ./...' to fix formatting issues"
+          exit 1
+        else
+          echo "All Go files are properly formatted"
+        fi
+
+    - name: Basic security check
+      run: |
+        echo "Running basic security checks..."
+        # Check for common security issues
+        if grep -r "password.*=" . --include="*.go" --include="*.yaml" --include="*.yml" | grep -v "DB_PASSWORD\|PGPASSWORD\|password_hash\|hashed_password"; then
+          echo "Found potential hardcoded passwords"
+        else
+          echo "No obvious hardcoded passwords found"
+        fi
