@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/tectix/mysticfunds/pkg/config"
 	_ "github.com/lib/pq"
+	"github.com/tectix/mysticfunds/pkg/config"
 )
 
 func NewConnection(cfg *config.Config) (*sql.DB, error) {

@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 	"github.com/tectix/mysticfunds/pkg/config"
 	"github.com/tectix/mysticfunds/pkg/logger"
 	pb "github.com/tectix/mysticfunds/proto/mana"
 	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,10 +35,10 @@ func setupTest(t *testing.T) *testSetup {
 		LogLevel: "info",
 	}
 	log := logger.NewLogger(cfg.LogLevel)
-	
+
 	// Create mock wizard client
 	wizardMock := &MockWizardServiceClient{}
-	
+
 	// Create mock scheduler
 	scheduler := NewInvestmentScheduler(db, log, wizardMock)
 

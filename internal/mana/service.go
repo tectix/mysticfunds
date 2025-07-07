@@ -213,12 +213,12 @@ func (s *ManaServiceImpl) ListTransactions(ctx context.Context, req *pb.ListTran
 	if pageSize <= 0 {
 		pageSize = 10
 	}
-	
+
 	pageNumber := req.PageNumber
 	if pageNumber <= 0 {
 		pageNumber = 1
 	}
-	
+
 	offset := (pageNumber - 1) * pageSize
 
 	// Get total count
@@ -247,7 +247,7 @@ func (s *ManaServiceImpl) ListTransactions(ctx context.Context, req *pb.ListTran
 	for rows.Next() {
 		var tx pb.ManaTransaction
 		var createdAt time.Time
-		
+
 		err := rows.Scan(
 			&tx.Id,
 			&tx.FromWizardId,
@@ -281,13 +281,13 @@ func (s *ManaServiceImpl) GetInvestmentTypes(ctx context.Context, req *pb.GetInv
 		query += fmt.Sprintf(" AND min_amount >= $%d", argCount)
 		args = append(args, req.MinAmount)
 	}
-	
+
 	if req.MaxAmount > 0 {
 		argCount++
 		query += fmt.Sprintf(" AND (max_amount IS NULL OR max_amount <= $%d)", argCount)
 		args = append(args, req.MaxAmount)
 	}
-	
+
 	if req.RiskLevel > 0 {
 		argCount++
 		query += fmt.Sprintf(" AND risk_level = $%d", argCount)
@@ -306,7 +306,7 @@ func (s *ManaServiceImpl) GetInvestmentTypes(ctx context.Context, req *pb.GetInv
 	for rows.Next() {
 		var it pb.InvestmentType
 		var maxAmount sql.NullInt64
-		
+
 		err := rows.Scan(
 			&it.Id,
 			&it.Name,

@@ -30,13 +30,13 @@ func NewWizardServiceImpl(db *sql.DB, cfg *config.Config, logger logger.Logger) 
 		cfg:    cfg,
 		logger: logger,
 	}
-	
+
 	// Initialize the job ticker
 	service.ticker = NewJobTicker(db, logger, service)
-	
+
 	// Start the ticker automatically
 	service.ticker.Start()
-	
+
 	return service
 }
 
@@ -48,7 +48,7 @@ func (s *WizardServiceImpl) CreateWizard(ctx context.Context, req *pb.CreateWiza
 		s.logger.Error("Failed to check wizard count", "error", err)
 		return nil, status.Error(codes.Internal, "Failed to check wizard count")
 	}
-	
+
 	if count >= 2 {
 		return nil, status.Error(codes.FailedPrecondition, "Users can only create up to 2 wizards")
 	}
@@ -450,7 +450,7 @@ func (s *WizardServiceImpl) UpdateJob(ctx context.Context, req *pb.UpdateJobRequ
 		`UPDATE jobs SET title = $1, description = $2, mana_reward_per_hour = $3, 
 		 exp_reward_per_hour = $4, max_wizards = $5, is_active = $6, updated_at = CURRENT_TIMESTAMP 
 		 WHERE id = $7`,
-		req.Title, req.Description, req.ManaRewardPerHour, req.ExpRewardPerHour, 
+		req.Title, req.Description, req.ManaRewardPerHour, req.ExpRewardPerHour,
 		req.MaxWizards, req.IsActive, req.Id)
 	if err != nil {
 		s.logger.Error("Failed to update job", "error", err)
@@ -495,8 +495,8 @@ func (s *WizardServiceImpl) AssignWizardToJob(ctx context.Context, req *pb.Assig
 
 	// Check if job exists and has available slots
 	var maxWizards, currentlyAssigned, durationMinutes int32
-	err = tx.QueryRowContext(ctx, 
-		"SELECT max_wizards, currently_assigned, duration_minutes FROM jobs WHERE id = $1 AND is_active = true", 
+	err = tx.QueryRowContext(ctx,
+		"SELECT max_wizards, currently_assigned, duration_minutes FROM jobs WHERE id = $1 AND is_active = true",
 		req.JobId).Scan(&maxWizards, &currentlyAssigned, &durationMinutes)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -515,9 +515,9 @@ func (s *WizardServiceImpl) AssignWizardToJob(ctx context.Context, req *pb.Assig
 	var wizardLevel int32
 	var requiredElement string
 	var requiredLevel int32
-	
-	err = tx.QueryRowContext(ctx, 
-		"SELECT w.element, w.level FROM wizards w WHERE w.id = $1", 
+
+	err = tx.QueryRowContext(ctx,
+		"SELECT w.element, w.level FROM wizards w WHERE w.id = $1",
 		req.WizardId).Scan(&wizardElement, &wizardLevel)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -527,8 +527,8 @@ func (s *WizardServiceImpl) AssignWizardToJob(ctx context.Context, req *pb.Assig
 		return nil, status.Error(codes.Internal, "Failed to assign wizard to job")
 	}
 
-	err = tx.QueryRowContext(ctx, 
-		"SELECT required_element, required_level FROM jobs WHERE id = $1", 
+	err = tx.QueryRowContext(ctx,
+		"SELECT required_element, required_level FROM jobs WHERE id = $1",
 		req.JobId).Scan(&requiredElement, &requiredLevel)
 	if err != nil {
 		s.logger.Error("Failed to get job requirements", "error", err)
@@ -543,7 +543,7 @@ func (s *WizardServiceImpl) AssignWizardToJob(ctx context.Context, req *pb.Assig
 		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Wizard level %d is below required level %d", wizardLevel, requiredLevel))
 	}
 
-	// Try to create new job assignment 
+	// Try to create new job assignment
 	// The database constraint will prevent duplicate active assignments
 	var assignmentId int64
 	err = tx.QueryRowContext(ctx,
@@ -571,7 +571,7 @@ func (s *WizardServiceImpl) AssignWizardToJob(ctx context.Context, req *pb.Assig
 	// Create job progress record with proper time tracking
 	startTime := time.Now()
 	endTime := startTime.Add(time.Duration(durationMinutes) * time.Minute)
-	
+
 	_, err = tx.ExecContext(ctx,
 		`INSERT INTO job_progress (assignment_id, started_at, actual_start_time, expected_end_time, progress_percentage, time_worked_minutes, is_active, last_tick_time) 
 		 VALUES ($1, $2, $2, $3, 0, 0, true, $2)`,
@@ -666,7 +666,7 @@ func (s *WizardServiceImpl) GetJobAssignments(ctx context.Context, req *pb.GetJo
 
 		if err := rows.Scan(
 			&assignment.Id, &assignment.JobId, &assignment.WizardId, &assignment.WizardName,
-			&assignedAt, &startedAt, &completedAt, &assignment.Status, 
+			&assignedAt, &startedAt, &completedAt, &assignment.Status,
 			&assignment.ManaEarned, &assignment.ExpEarned, &notes,
 			&job.Title, &job.Description, &job.RequiredElement, &job.RequiredLevel,
 			&job.ManaRewardPerHour, &job.ExpRewardPerHour, &job.DurationMinutes,
@@ -777,7 +777,7 @@ func (s *WizardServiceImpl) CompleteJobAssignment(ctx context.Context, req *pb.C
 	// Calculate new experience and level
 	newExp := currentExp + totalExp
 	newLevel := s.calculateLevel(newExp)
-	
+
 	// Update wizard's mana, experience, and level
 	_, err = tx.ExecContext(ctx,
 		`UPDATE wizards SET mana_balance = mana_balance + $1, experience_points = $2, level = $3
@@ -791,7 +791,7 @@ func (s *WizardServiceImpl) CompleteJobAssignment(ctx context.Context, req *pb.C
 	// Log level up if it occurred
 	if newLevel > currentLevel {
 		s.logger.Info("Wizard leveled up!", "wizard_id", wizardId, "old_level", currentLevel, "new_level", newLevel)
-		
+
 		// Create activity log for level up
 		_, err = tx.ExecContext(ctx,
 			`INSERT INTO activity_logs (user_id, wizard_id, activity_type, activity_description, metadata) 
@@ -857,16 +857,16 @@ func (s *WizardServiceImpl) calculateLevel(experiencePoints int32) int32 {
 	if experiencePoints < 0 {
 		return 1
 	}
-	
+
 	// Use a gentler curve: level = floor(experience / 100) + 1
 	// This means: Level 1 = 0-99 exp, Level 2 = 100-199 exp, Level 3 = 200-299 exp, etc.
 	level := (experiencePoints / 100) + 1
-	
+
 	// Cap at level 50 for now
 	if level > 50 {
 		return 50
 	}
-	
+
 	return level
 }
 
@@ -939,7 +939,7 @@ func (s *WizardServiceImpl) getJobAssignmentByID(ctx context.Context, id int64) 
 		 WHERE ja.id = $1`,
 		id).Scan(
 		&assignment.Id, &assignment.JobId, &assignment.WizardId, &assignment.WizardName,
-		&assignedAt, &startedAt, &completedAt, &assignment.Status, 
+		&assignedAt, &startedAt, &completedAt, &assignment.Status,
 		&assignment.ManaEarned, &assignment.ExpEarned, &notes,
 		&progress.Id, &progress.AssignmentId, &progressStartedAt, &progressLastUpdated,
 		&progress.ProgressPercentage, &progress.TimeWorkedMinutes, &progress.IsActive, &progressCreatedAt)
@@ -1064,7 +1064,7 @@ func (s *WizardServiceImpl) UpdateJobProgress(ctx context.Context, req *pb.Updat
 	// Auto-complete the job if progress reaches 100%
 	if progressPercentage >= 100 && assignmentStatus != "completed" {
 		s.logger.Info("Auto-completing job assignment", "assignment_id", req.AssignmentId)
-		
+
 		// We'll let the frontend handle completion to maintain the existing flow
 		// But we can mark the progress as ready for completion
 		_, err = tx.ExecContext(ctx,
@@ -1110,23 +1110,23 @@ func (s *WizardServiceImpl) GetJobProgress(ctx context.Context, req *pb.GetJobPr
 		now := time.Now()
 		startTime := actualStartTime.Time
 		endTime := expectedEndTime.Time
-		
+
 		if now.After(startTime) {
 			elapsed := now.Sub(startTime)
 			total := endTime.Sub(startTime)
-			
+
 			if elapsed >= total {
 				progress.ProgressPercentage = 100
 			} else {
 				progressFloat := float64(elapsed) / float64(total) * 100
 				realTimeProgress := int32(progressFloat)
-				
+
 				// Use the higher of stored progress or real-time progress
 				if realTimeProgress > progress.ProgressPercentage {
 					progress.ProgressPercentage = realTimeProgress
 				}
 			}
-			
+
 			// Update time worked
 			progress.TimeWorkedMinutes = int32(elapsed.Minutes())
 		}
@@ -1222,7 +1222,7 @@ func (s *WizardServiceImpl) GetActivities(ctx context.Context, req *pb.GetActivi
 	}
 
 	return &pb.GetActivitiesResponse{
-		Activities:  activities,
+		Activities: activities,
 		TotalCount: totalCount,
 	}, nil
 }

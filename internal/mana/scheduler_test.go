@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tectix/mysticfunds/pkg/logger"
-	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/tectix/mysticfunds/pkg/logger"
+	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
 )
 
 func TestInvestmentScheduler(t *testing.T) {
@@ -46,7 +46,7 @@ func TestInvestmentScheduler(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		// Mock wizard service call with flexible matching
-		wizardMock.On("UpdateManaBalance", 
+		wizardMock.On("UpdateManaBalance",
 			mock.Anything, // context
 			mock.MatchedBy(func(req *wizardpb.UpdateManaBalanceRequest) bool {
 				return req.WizardId == int64(1) && req.Reason == "Investment return"
@@ -92,7 +92,7 @@ func TestScheduleInvestmentCompletion(t *testing.T) {
 			}).AddRow(1, 1000, 5.0, 2))
 		sqlMock.ExpectExec("UPDATE wizard_investments").
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		
+
 		// Mock wizard service call with flexible matching
 		wizardMock.On("UpdateManaBalance",
 			mock.Anything, // context
@@ -102,7 +102,7 @@ func TestScheduleInvestmentCompletion(t *testing.T) {
 			NewBalance: 1100,
 			Success:    true,
 		}, nil)
-		
+
 		sqlMock.ExpectCommit()
 
 		scheduler.ScheduleInvestmentCompletion(1, pastTime)
@@ -121,12 +121,12 @@ func TestCalculateReturnRate(t *testing.T) {
 	// Calculate return rate multiple times to test variance
 	for i := 0; i < 10; i++ {
 		actualRate := calculateReturnRate(baseRate, riskLevel)
-		
+
 		// Should be within reasonable bounds (baseRate ± variance)
 		variance := float64(riskLevel) * 2.0
 		assert.GreaterOrEqual(t, actualRate, baseRate-variance-1.0) // Allow small margin
 		assert.LessOrEqual(t, actualRate, baseRate+variance+1.0)    // Allow small margin
-		
+
 		// Should never go below -90%
 		assert.GreaterOrEqual(t, actualRate, -90.0)
 	}

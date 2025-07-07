@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 	jwtauth "github.com/tectix/mysticfunds/pkg/auth"
 	"github.com/tectix/mysticfunds/pkg/config"
 	"github.com/tectix/mysticfunds/pkg/logger"
 	pb "github.com/tectix/mysticfunds/proto/auth"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,7 +60,7 @@ func TestRegister(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resp.Token)
 	assert.Equal(t, int64(1), resp.UserId)
-	
+
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 

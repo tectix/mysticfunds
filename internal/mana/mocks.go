@@ -2,9 +2,9 @@ package mana
 
 import (
 	"context"
-	
-	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
+
 	"github.com/stretchr/testify/mock"
+	wizardpb "github.com/tectix/mysticfunds/proto/wizard"
 	"google.golang.org/grpc"
 )
 

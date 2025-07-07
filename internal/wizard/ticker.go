@@ -295,12 +295,12 @@ func (jt *JobTicker) autoCompleteFinishedJobs(ctx context.Context) error {
 	// Auto-complete each finished job
 	for _, assignmentID := range assignmentIDs {
 		jt.logger.Info("Auto-completing finished job", "assignment_id", assignmentID)
-		
+
 		_, err := jt.service.CompleteJobAssignment(ctx, &pb.CompleteJobAssignmentRequest{
 			AssignmentId: assignmentID,
 		})
 		if err != nil {
-			jt.logger.Error("Failed to auto-complete job assignment", 
+			jt.logger.Error("Failed to auto-complete job assignment",
 				"assignment_id", assignmentID, "error", err)
 		}
 	}
