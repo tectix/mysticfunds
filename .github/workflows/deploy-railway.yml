@@ -71,6 +71,12 @@ jobs:
 
     - name: Deploy to Railway
       run: |
+        echo "Checking Railway token..."
+        if [ -z "$RAILWAY_TOKEN" ]; then
+          echo "::error title=Railway Token Missing::RAILWAY_TOKEN secret not set"
+          exit 1
+        fi
+        
         echo "Starting Railway deployment..."
         railway up --detach
         
