@@ -1,0 +1,20 @@
+[variables]
+NIXPACKS_METADATA = "go"
+
+[phases.setup]
+nixPkgs = ["go_1_21", "postgresql"]
+
+[phases.build]
+cmds = [
+  "go mod download",
+  "make build-all"
+]
+
+[phases.install]
+cmds = [
+  "mkdir -p /app/bin",
+  "cp cmd/*/bin/* /app/bin/ || true"
+]
+
+[start]
+cmd = "./bin/api-gateway"

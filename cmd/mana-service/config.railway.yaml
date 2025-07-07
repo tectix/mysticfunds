@@ -1,0 +1,40 @@
+# Mana Service Configuration for Railway
+service_name: mana-service
+grpc_port: 50053
+http_port: 8083
+log_level: info
+
+# Database configuration (uses Railway environment variables)
+database:
+  host: ${PGHOST}
+  port: ${PGPORT}
+  user: ${PGUSER}
+  password: ${PGPASSWORD}
+  name: mana
+  max_connections: 25
+  connection_timeout: 30s
+
+# Service endpoints
+services:
+  auth_service: localhost:50051
+  wizard_service: localhost:50052
+
+# Job processing configuration
+jobs:
+  tick_interval: 30s
+  progress_update_interval: 60s
+  completion_check_interval: 300s
+
+# CORS configuration
+cors:
+  allowed_origins:
+    - "*"
+  allowed_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed_headers:
+    - Content-Type
+    - Authorization

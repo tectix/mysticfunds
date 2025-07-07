@@ -1,0 +1,44 @@
+# API Gateway Configuration for Railway
+service_name: api-gateway
+http_port: ${PORT}
+log_level: info
+
+# Service endpoints
+services:
+  auth_service: localhost:50051
+  wizard_service: localhost:50052
+  mana_service: localhost:50053
+
+# Static file serving
+static:
+  enabled: true
+  path: ./web
+  index_file: index.html
+
+# CORS configuration
+cors:
+  enabled: true
+  allowed_origins:
+    - "*"
+  allowed_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed_headers:
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+  allow_credentials: true
+
+# Health check
+health:
+  enabled: true
+  path: /health
+  
+# Rate limiting
+rate_limit:
+  enabled: true
+  requests_per_minute: 60
+  burst_size: 10

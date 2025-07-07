@@ -265,4 +265,27 @@ help:
 	@echo "  make clean           - Clean all service binaries and gateway"
 	@echo "  make all             - Create DBs, run migrations, and build (default)"
 	@echo ""
+	@echo "Deployment:"
+	@echo "  make build-railway   - Build all services for Railway deployment"
+	@echo "  make start-production - Start services in production mode"
+	@echo ""
 	@echo "Tip: Use 'make start' for one-command startup!"
+
+# Production build for Railway
+build-railway:
+	@echo "Building all services for Railway..."
+	@for service in $(SERVICES); do \
+		echo "Building $$service..."; \
+		cd cmd/$$service-service && $(MAKE) build && cd ../..; \
+	done
+	@echo "Building API Gateway..."
+	@cd cmd/$(GATEWAY) && $(MAKE) build && cd ../..
+	@echo "Railway build complete!"
+
+# Alias for build-railway
+build-all: build-railway
+
+# Start services for production (Railway)
+start-production:
+	@echo "Starting MysticFunds in production mode..."
+	@./railway-start.sh
