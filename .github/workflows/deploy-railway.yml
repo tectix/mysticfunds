@@ -78,10 +78,10 @@ jobs:
         fi
         
         echo "Starting Railway deployment..."
-        railway up --detach
+        railway up --detach --service mysticfunds-backend
         
         echo "Getting deployment URL..."
-        RAILWAY_URL=$(railway domain)
+        RAILWAY_URL=$(railway domain --service mysticfunds-backend)
         echo "::notice title=Railway Deployment::Deployed to $RAILWAY_URL"
         echo "RAILWAY_URL=$RAILWAY_URL" >> $GITHUB_ENV
         
@@ -98,7 +98,7 @@ jobs:
     - name: Verify deployment
       run: |
         echo "Checking Railway deployment status..."
-        railway status || echo "Status check failed, but deployment may still be in progress"
+        railway status --service mysticfunds-backend || echo "Status check failed, but deployment may still be in progress"
         echo "ailway deployment completed!"
         echo "Live at: $RAILWAY_URL"
       timeout-minutes: 2
