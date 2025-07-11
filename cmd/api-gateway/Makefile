@@ -18,7 +18,7 @@ BINARY_DIR := bin
 build:
 	@echo "Building $(SERVICE_NAME)..."
 	@$(MKDIR) $(BINARY_DIR) 2>/dev/null || true
-	@go build -o $(BINARY_DIR)/$(BINARY_NAME) main.go
+	@go build -o $(BINARY_DIR)/$(BINARY_NAME) .
 
 run: build
 	@echo "Running $(SERVICE_NAME)..."
