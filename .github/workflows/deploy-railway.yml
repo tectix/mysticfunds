@@ -85,7 +85,7 @@ jobs:
         railway up --detach --service motivated-appreciation
         
         echo "Getting deployment URL..."
-        RAILWAY_URL=$(railway domain --service motivated-appreciation)
+        RAILWAY_URL=$(railway domain --service motivated-appreciation 2>/dev/null || echo "https://motivated-appreciation-production.up.railway.app")
         echo "::notice title=Railway Deployment::Deployed to $RAILWAY_URL"
         echo "RAILWAY_URL=$RAILWAY_URL" >> $GITHUB_ENV
         
