@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build all services
-RUN make build-all
+RUN make build
 
 # Final stage
 FROM alpine:latest
