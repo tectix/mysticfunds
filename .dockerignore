@@ -22,8 +22,9 @@ cmd/*/bin/
 # Go build cache
 .cache/
 
-# Test files
-*_test.go
+# Test files (but keep main.go files)
+**/*_test.go
+!**/main.go
 coverage.out
 coverage.html
 
