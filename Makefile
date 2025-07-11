@@ -279,12 +279,16 @@ build-railway:
 		cd cmd/$$service-service && $(MAKE) build && cd ../..; \
 	done
 	@echo "Building API Gateway..."
-	@if [ -f cmd/$(GATEWAY)/Makefile ]; then \
-		cd cmd/$(GATEWAY) && $(MAKE) build && cd ../..; \
+	@if [ -f cmd/$(GATEWAY)/main.go ]; then \
+		if [ -f cmd/$(GATEWAY)/Makefile ]; then \
+			cd cmd/$(GATEWAY) && $(MAKE) build && cd ../..; \
+		else \
+			echo "No Makefile found for API Gateway, building directly..."; \
+			mkdir -p cmd/$(GATEWAY)/bin; \
+			cd cmd/$(GATEWAY) && go build -o bin/api-gateway . && cd ../..; \
+		fi; \
 	else \
-		echo "No Makefile found for API Gateway, building directly..."; \
-		mkdir -p cmd/$(GATEWAY)/bin; \
-		cd cmd/$(GATEWAY) && go build -o bin/api-gateway . && cd ../..; \
+		echo "No API Gateway source files found, skipping..."; \
 	fi
 	@echo "Railway build complete!"
 
