@@ -7,7 +7,7 @@ nixPkgs = ["go_1_21", "postgresql"]
 [phases.build]
 cmds = [
   "go mod download",
-  "make build-all"
+  "make build"
 ]
 
 [phases.install]
