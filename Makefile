@@ -13,7 +13,7 @@ ifeq ($(OS),Windows_NT)
     BINARY_EXT := .exe
     CREATE_DIR = if not exist "$(1)" $(MKDIR) "$(1)"
 else
-    SHELL := /bin/bash
+    SHELL := /bin/sh
     RM := rm -f
     MKDIR := mkdir -p
     PSQL := psql
