@@ -11,7 +11,7 @@ ifeq ($(OS),Windows_NT)
     NULL := nul
     SEP := &
 else
-    SHELL := /bin/bash
+    SHELL := /bin/sh
     RM := rm -f
     RMDIR := rm -rf
     MKDIR := mkdir -p
