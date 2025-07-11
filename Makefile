@@ -284,7 +284,7 @@ build-railway:
 	else \
 		echo "No Makefile found for API Gateway, building directly..."; \
 		mkdir -p cmd/$(GATEWAY)/bin; \
-		cd cmd/$(GATEWAY) && go build -o bin/api-gateway main.go && cd ../..; \
+		cd cmd/$(GATEWAY) && go build -o bin/api-gateway . && cd ../..; \
 	fi
 	@echo "Railway build complete!"
 
