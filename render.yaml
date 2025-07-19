@@ -1,0 +1,121 @@
+databases:
+  - name: mysticfunds-postgres
+    databaseName: mysticfunds
+    user: mysticfunds
+    plan: free
+
+services:
+  - type: web
+    name: auth-service
+    env: docker
+    dockerfilePath: ./cmd/auth-service/Dockerfile
+    plan: free
+    envVars:
+      - key: GRPC_PORT
+        value: 50051
+      - key: LOG_LEVEL
+        value: info
+      - key: JWT_SECRET
+        value: 7d0f37528a8ea38ed20c974082a2aa071a0685282764cb9fcddb8c2f89fc03f8
+      - key: DB_HOST
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: password
+      - key: DB_NAME
+        value: auth
+
+  - type: web
+    name: wizard-service
+    env: docker
+    dockerfilePath: ./cmd/wizard-service/Dockerfile
+    plan: free
+    envVars:
+      - key: GRPC_PORT
+        value: 50052
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_HOST
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: password
+      - key: DB_NAME
+        value: wizard
+
+  - type: web
+    name: mana-service
+    env: docker
+    dockerfilePath: ./cmd/mana-service/Dockerfile
+    plan: free
+    envVars:
+      - key: GRPC_PORT
+        value: 50053
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_HOST
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: password
+      - key: DB_NAME
+        value: mana
+
+  - type: web
+    name: api-gateway
+    env: docker
+    dockerfilePath: ./cmd/api-gateway/Dockerfile
+    plan: free
+    envVars:
+      - key: HTTP_PORT
+        value: 8080
+      - key: LOG_LEVEL
+        value: info
+      - key: AUTH_SERVICE_ADDR
+        fromService:
+          type: web
+          name: auth-service
+          property: hostport
+      - key: WIZARD_SERVICE_ADDR
+        fromService:
+          type: web
+          name: wizard-service
+          property: hostport
+      - key: MANA_SERVICE_ADDR
+        fromService:
+          type: web
+          name: mana-service
+          property: hostport
