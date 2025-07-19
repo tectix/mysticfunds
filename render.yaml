@@ -8,7 +8,7 @@ services:
   - type: web
     name: auth-service
     env: docker
-    dockerfilePath: ./cmd/auth-service/Dockerfile
+    dockerfilePath: cmd/auth-service/Dockerfile
     plan: free
     envVars:
       - key: GRPC_PORT
@@ -39,7 +39,7 @@ services:
   - type: web
     name: wizard-service
     env: docker
-    dockerfilePath: ./cmd/wizard-service/Dockerfile
+    dockerfilePath: cmd/wizard-service/Dockerfile
     plan: free
     envVars:
       - key: GRPC_PORT
@@ -68,7 +68,7 @@ services:
   - type: web
     name: mana-service
     env: docker
-    dockerfilePath: ./cmd/mana-service/Dockerfile
+    dockerfilePath: cmd/mana-service/Dockerfile
     plan: free
     envVars:
       - key: GRPC_PORT
@@ -97,7 +97,7 @@ services:
   - type: web
     name: api-gateway
     env: docker
-    dockerfilePath: ./cmd/api-gateway/Dockerfile
+    dockerfilePath: cmd/api-gateway/Dockerfile
     plan: free
     envVars:
       - key: HTTP_PORT
