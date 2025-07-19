@@ -9,7 +9,6 @@ services:
     name: migrations
     env: docker
     dockerfilePath: scripts/Dockerfile.migrations
-    startCommand: "/usr/local/bin/init-databases-and-migrate.sh"
     plan: free
     envVars:
       - key: DB_HOST
