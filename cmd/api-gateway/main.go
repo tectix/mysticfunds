@@ -352,8 +352,6 @@ func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get user ID from context for filtering user's own wizards
-		type contextKey string
-		const userIDKey contextKey = "user_id"
 		userID := r.Context().Value(userIDKey).(int64)
 
 		resp, err := g.wizardClient.ListWizards(ctx, &wizardpb.ListWizardsRequest{
@@ -369,7 +367,7 @@ func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPost:
 		var req wizardpb.CreateWizardRequest
@@ -390,7 +388,7 @@ func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -421,7 +419,7 @@ func (g *Gateway) handleWizardByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPut:
 		var req wizardpb.UpdateWizardRequest
@@ -439,7 +437,7 @@ func (g *Gateway) handleWizardByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodDelete:
 		resp, err := g.wizardClient.DeleteWizard(ctx, &wizardpb.DeleteWizardRequest{
@@ -452,7 +450,7 @@ func (g *Gateway) handleWizardByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -589,7 +587,7 @@ func (g *Gateway) handleInvestments(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPost:
 		var req manapb.CreateInvestmentRequest
@@ -606,7 +604,7 @@ func (g *Gateway) handleInvestments(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -712,7 +710,7 @@ func (g *Gateway) handleJobs(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPost:
 		var req wizardpb.CreateJobRequest
@@ -729,7 +727,7 @@ func (g *Gateway) handleJobs(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -760,7 +758,7 @@ func (g *Gateway) handleJobByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPut:
 		var req wizardpb.UpdateJobRequest
@@ -778,7 +776,7 @@ func (g *Gateway) handleJobByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodDelete:
 		resp, err := g.wizardClient.DeleteJob(ctx, &wizardpb.DeleteJobRequest{
@@ -791,7 +789,7 @@ func (g *Gateway) handleJobByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -898,7 +896,7 @@ func (g *Gateway) handleJobAssignmentByID(w http.ResponseWriter, r *http.Request
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 
 		} else if actionReq.Action == "cancel" {
 			resp, err := g.wizardClient.CancelJobAssignment(ctx, &wizardpb.CancelJobAssignmentRequest{
@@ -912,7 +910,7 @@ func (g *Gateway) handleJobAssignmentByID(w http.ResponseWriter, r *http.Request
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 
 		} else {
 			http.Error(w, "Invalid action. Use 'complete' or 'cancel'", http.StatusBadRequest)
@@ -929,7 +927,7 @@ func (g *Gateway) handleActivities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := r.Context().Value("user_id").(int64)
+	userID := r.Context().Value(userIDKey).(int64)
 	wizardIDStr := r.URL.Query().Get("wizard_id")
 	activityType := r.URL.Query().Get("activity_type")
 	pageSize, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
@@ -991,7 +989,7 @@ func (g *Gateway) handleJobProgress(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	case http.MethodPut:
 		var req wizardpb.UpdateJobProgressRequest
@@ -1009,7 +1007,7 @@ func (g *Gateway) handleJobProgress(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
