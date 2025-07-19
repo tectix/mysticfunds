@@ -1,6 +1,11 @@
 -- Seed data for artifacts, scrolls, and spells
 -- This migration populates the marketplace with initial magical items
 
+-- First, ensure the artifacts table constraint allows 'Forbidden' rarity
+ALTER TABLE artifacts DROP CONSTRAINT IF EXISTS artifacts_rarity_check;
+ALTER TABLE artifacts ADD CONSTRAINT artifacts_rarity_check 
+CHECK (rarity IN ('Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical', 'Forbidden'));
+
 -- Insert Artifacts for each realm
 -- Pyrrhian Flame (realm_id = 1)
 INSERT INTO artifacts (realm_id, name, description, lore, power_level, rarity, mana_cost, artifact_type, special_abilities, requirements, image_url) VALUES
