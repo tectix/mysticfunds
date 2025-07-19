@@ -5,10 +5,9 @@ databases:
     plan: free
 
 services:
-  - type: web
+  - type: worker
     name: migrations
     env: docker
-    dockerCommand: ./scripts/init-databases-and-migrate.sh
     dockerfilePath: scripts/Dockerfile.migrations
     plan: free
     envVars:
@@ -28,6 +27,7 @@ services:
         fromDatabase:
           name: mysticfunds-postgres
           property: password
+
   - type: web
     name: auth-service
     env: docker
