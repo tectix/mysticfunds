@@ -16,7 +16,7 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: JWT_SECRET
-        value: 7d0f37528a8ea38ed20c974082a2aa071a0685282764cb9fcddb8c2f89fc03f8
+        sync: false
       - key: DB_HOST
         fromDatabase:
           name: mysticfunds-postgres
