@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS wizards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_wizards_user_id ON wizards(user_id);
-CREATE INDEX idx_wizards_realm ON wizards(realm);
-CREATE INDEX idx_wizards_element ON wizards(element);
-CREATE INDEX idx_wizards_guild_id ON wizards(guild_id);
+CREATE INDEX IF NOT EXISTS idx_wizards_user_id ON wizards(user_id);
+CREATE INDEX IF NOT EXISTS idx_wizards_realm ON wizards(realm);
+CREATE INDEX IF NOT EXISTS idx_wizards_element ON wizards(element);
+CREATE INDEX IF NOT EXISTS idx_wizards_guild_id ON wizards(guild_id);

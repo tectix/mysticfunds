@@ -37,14 +37,14 @@ CREATE TABLE IF NOT EXISTS job_assignments (
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_jobs_realm_id ON jobs(realm_id);
-CREATE INDEX idx_jobs_required_element ON jobs(required_element);
-CREATE INDEX idx_jobs_difficulty ON jobs(difficulty);
-CREATE INDEX idx_jobs_is_active ON jobs(is_active);
-CREATE INDEX idx_jobs_created_by_wizard_id ON jobs(created_by_wizard_id);
-CREATE INDEX idx_job_assignments_job_id ON job_assignments(job_id);
-CREATE INDEX idx_job_assignments_wizard_id ON job_assignments(wizard_id);
-CREATE INDEX idx_job_assignments_status ON job_assignments(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_realm_id ON jobs(realm_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_required_element ON jobs(required_element);
+CREATE INDEX IF NOT EXISTS idx_jobs_difficulty ON jobs(difficulty);
+CREATE INDEX IF NOT EXISTS idx_jobs_is_active ON jobs(is_active);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_by_wizard_id ON jobs(created_by_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_job_id ON job_assignments(job_id);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_wizard_id ON job_assignments(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_status ON job_assignments(status);
 
 -- Insert sample mystical jobs for each realm type
 INSERT INTO jobs (realm_id, title, description, required_element, required_level, mana_reward_per_hour, exp_reward_per_hour, duration_minutes, max_wizards, difficulty, job_type, location, special_requirements) VALUES 

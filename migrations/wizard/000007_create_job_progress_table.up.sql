@@ -12,9 +12,9 @@ CREATE TABLE job_progress (
 );
 
 -- Add indexes for better performance
-CREATE INDEX idx_job_progress_assignment_id ON job_progress(assignment_id);
-CREATE INDEX idx_job_progress_is_active ON job_progress(is_active);
-CREATE INDEX idx_job_progress_started_at ON job_progress(started_at);
+CREATE INDEX IF NOT EXISTS idx_job_progress_assignment_id ON job_progress(assignment_id);
+CREATE INDEX IF NOT EXISTS idx_job_progress_is_active ON job_progress(is_active);
+CREATE INDEX IF NOT EXISTS idx_job_progress_started_at ON job_progress(started_at);
 
 -- Add a table for activity logs
 CREATE TABLE IF NOT EXISTS activity_logs (
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 );
 
 -- Add indexes for activity logs
-CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
-CREATE INDEX idx_activity_logs_wizard_id ON activity_logs(wizard_id);
-CREATE INDEX idx_activity_logs_type ON activity_logs(activity_type);
-CREATE INDEX idx_activity_logs_created_at ON activity_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_wizard_id ON activity_logs(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_type ON activity_logs(activity_type);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at);

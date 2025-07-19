@@ -23,27 +23,30 @@ CREATE TABLE guilds (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create realms table with complete data
+-- Create realms table with complete data including lore and artifacts
 CREATE TABLE realms (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    element VARCHAR(50),
+    element VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    lore TEXT NOT NULL,
+    artifact_name VARCHAR(100) NOT NULL,
+    artifact_description TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert all realm data
-INSERT INTO realms (id, name, description, element) VALUES 
-(1, 'Pyrrhian Flame', 'Realm of eternal fire and volcanic titans', 'Fire'),
-(2, 'Zepharion Heights', 'Floating islands around an eternal cyclone', 'Air'), 
-(3, 'Terravine Hollow', 'Ancient buried realm of stone titans', 'Earth'),
-(4, 'Thalorion Depths', 'Submerged empire of the Moonbound Court', 'Water'),
-(5, 'Virelya', 'Blinding paradise of pure truth', 'Light'),
-(6, 'Umbros', 'Void-split realm where light cannot reach', 'Shadow'),
-(7, 'Nyxthar', 'Realm where reality collapses inward', 'Null'),
-(8, 'Aetherion', 'Realm between realms of dreaming dead', 'Spirit'),
-(9, 'Chronarxis', 'Spiral palace of fractured timelines', 'Time'),
-(10, 'Technarok', 'Fusion of steel gods and nano-intelligences', 'Metal');
+-- Insert all realm data with complete lore and artifact information
+INSERT INTO realms (id, name, element, description, lore, artifact_name, artifact_description) VALUES 
+(1, 'Pyrrhian Flame', 'Fire', 'Realm of eternal fire and volcanic titans', 'Home to the Salamandrine Lords and the Eternal Forge. Pyrrhian Flame births volcanic titans and flame-bonded warriors. Time moves faster here, aging all who enter.', 'Heart of Cinder', 'A molten gem that grants destructive power and burns away lies.'),
+(2, 'Zepharion Heights', 'Air', 'Floating islands around an eternal cyclone', 'Floating islands encircle a permanent cyclone known as The Whisper. Skyborn sages ride wind-serpents and wield songs that bend reality.', 'Aeon Harp', 'Plays melodies that control storms and memories.'),
+(3, 'Terravine Hollow', 'Earth', 'Ancient buried realm of stone titans', 'An ancient, buried realm where roots grow like veins and sentient stone titans slumber. Once a great civilization, now petrified into time.', 'Verdant Core', 'Grants dominion over life, soil, and rebirth.'),
+(4, 'Thalorion Depths', 'Water', 'Submerged empire of the Moonbound Court', 'A submerged empire ruled by the Moonbound Court. Time slows here, and the ocean whispers ancient truths. Home to leviathans and drowned prophets.', 'Tideglass Mirror', 'Sees through illusions and to possible futures.'),
+(5, 'Virelya', 'Light', 'Blinding paradise of pure truth', 'A blinding paradise where truth manifests as form. Ruled by beings known as Radiants. Mortals must wear veilshades to even look upon it.', 'Lumen Shard', 'Reveals the true name of anything it touches.'),
+(6, 'Umbros', 'Shadow', 'Void-split realm where light cannot reach', 'Light cannot reach this void-split realm. Every whisper is a thought stolen, every step a forgotten path. Shadowmages barter in memories.', 'Eclipse Fang', 'Severs light, binding a soul to darkness.'),
+(7, 'Nyxthar', 'Null', 'Realm where reality collapses inward', 'A realm where reality collapses inward. Voidwalkers and Silence Priests seek ultimate release from being. To enter is to forget existence.', 'Hollow Crown', 'Nullifies all magic and erases history.'),
+(8, 'Aetherion', 'Spirit', 'Realm between realms of dreaming dead', 'The realm between realms, where the dreaming dead speak. Time is nonlinear, and the laws of logic bend to desire. Spirits travel as thought.', 'Soulforge Locket', 'Binds spirits to bodies or frees them eternally.'),
+(9, 'Chronarxis', 'Time', 'Spiral palace of fractured timelines', 'A spiral palace where timelines fracture and reform. Timekeepers judge anomalies and anomalies fight back. Accessed only through ancient rituals.', 'Clockheart Mechanism', 'Rewinds one moment once, but at a cost.'),
+(10, 'Technarok', 'Metal', 'Fusion of steel gods and nano-intelligences', 'A fusion of ancient steel gods and nano-intelligences. Run on logic and decay. Home to sentient forges and recursive codebeasts.', 'Iron Synapse', 'Merges user with machine intelligence.');
 
 -- Create comprehensive wizards table
 CREATE TABLE wizards (

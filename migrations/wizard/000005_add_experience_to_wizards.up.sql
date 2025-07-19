@@ -4,7 +4,7 @@ ADD COLUMN experience_points INTEGER DEFAULT 0,
 ADD COLUMN level INTEGER DEFAULT 1;
 
 -- Create index for level-based queries
-CREATE INDEX idx_wizards_level ON wizards(level);
+CREATE INDEX IF NOT EXISTS idx_wizards_level ON wizards(level);
 
 -- Update existing wizards to have some random levels/experience
 UPDATE wizards SET 

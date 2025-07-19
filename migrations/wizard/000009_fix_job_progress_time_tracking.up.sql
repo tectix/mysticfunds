@@ -24,9 +24,9 @@ WHERE expected_end_time IS NULL
 AND is_active = true;
 
 -- Add indexes for better performance on time queries
-CREATE INDEX idx_job_progress_expected_end_time ON job_progress(expected_end_time);
-CREATE INDEX idx_job_progress_actual_start_time ON job_progress(actual_start_time);
-CREATE INDEX idx_job_progress_last_tick_time ON job_progress(last_tick_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_expected_end_time ON job_progress(expected_end_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_actual_start_time ON job_progress(actual_start_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_last_tick_time ON job_progress(last_tick_time);
 
 -- Add a function to calculate real-time progress percentage
 CREATE OR REPLACE FUNCTION calculate_job_progress_percentage(

@@ -1,2 +1,2 @@
-DROP TABLE IF EXISTS spells;
-DROP TABLE IF EXISTS wizard_spells;
+-- NOTE: Spells table is now managed by the wizard service
+-- This down migration is deprecated - no operations needed

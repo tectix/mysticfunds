@@ -55,6 +55,9 @@ INSERT INTO wizards (user_id, name, realm, element, mana_balance, experience_poi
 (999, 'Steel Logicengine', 'Technarok', 'Metal', 10900, 16100, 15, NOW() - INTERVAL '55 days'),
 (999, 'Brass Recursive', 'Technarok', 'Metal', 8600, 13200, 14, NOW() - INTERVAL '46 days');
 
+-- Ensure guilds table has description column (defensive programming)
+ALTER TABLE guilds ADD COLUMN IF NOT EXISTS description TEXT;
+
 -- Create some sample guilds and assign wizards
 INSERT INTO guilds (name, description, created_at) VALUES 
 ('Salamandrine Lords', 'Elite fire mages of Pyrrhian Flame', NOW()),
