@@ -28,7 +28,7 @@ services:
           name: mysticfunds-postgres
           property: password
 
-  - type: web
+  - type: worker
     name: auth-service
     env: docker
     dockerfilePath: cmd/auth-service/Dockerfile
@@ -61,7 +61,7 @@ services:
       - key: DB_NAME
         value: auth
 
-  - type: web
+  - type: worker
     name: wizard-service
     env: docker
     dockerfilePath: cmd/wizard-service/Dockerfile
@@ -92,7 +92,7 @@ services:
       - key: DB_NAME
         value: wizard
 
-  - type: web
+  - type: worker
     name: mana-service
     env: docker
     dockerfilePath: cmd/mana-service/Dockerfile
@@ -139,16 +139,16 @@ services:
         value: info
       - key: AUTH_SERVICE_ADDR
         fromService:
-          type: web
+          type: worker
           name: auth-service
           property: hostport
       - key: WIZARD_SERVICE_ADDR
         fromService:
-          type: web
+          type: worker
           name: wizard-service
           property: hostport
       - key: MANA_SERVICE_ADDR
         fromService:
-          type: web
+          type: worker
           name: mana-service
           property: hostport

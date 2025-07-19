@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
     description TEXT NOT NULL,
     lore TEXT NOT NULL,
     power_level INTEGER NOT NULL CHECK (power_level BETWEEN 1 AND 10),
-    rarity VARCHAR(20) NOT NULL CHECK (rarity IN ('Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical')),
+    rarity VARCHAR(20) NOT NULL CHECK (rarity IN ('Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical', 'Forbidden')),
     mana_cost BIGINT NOT NULL,
     artifact_type VARCHAR(50) NOT NULL, -- 'Weapon', 'Armor', 'Accessory', 'Tome', 'Relic'
     special_abilities TEXT[], -- Array of special abilities
@@ -111,19 +111,19 @@ CREATE TABLE IF NOT EXISTS marketplace_transactions (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_artifacts_realm_id ON artifacts(realm_id);
-CREATE INDEX idx_artifacts_rarity ON artifacts(rarity);
-CREATE INDEX idx_artifacts_available ON artifacts(is_available);
-CREATE INDEX idx_scrolls_skill_type ON scrolls(skill_type);
-CREATE INDEX idx_scrolls_available ON scrolls(is_available);
-CREATE INDEX idx_spells_school ON spells(spell_school);
-CREATE INDEX idx_spells_element ON spells(element);
-CREATE INDEX idx_wizard_artifacts_wizard_id ON wizard_artifacts(wizard_id);
-CREATE INDEX idx_wizard_scrolls_wizard_id ON wizard_scrolls(wizard_id);
-CREATE INDEX idx_wizard_spells_wizard_id ON wizard_spells(wizard_id);
-CREATE INDEX idx_wizard_spells_learned_from ON wizard_spells(learned_from_wizard_id);
-CREATE INDEX idx_wizard_spell_teaching_wizard_id ON wizard_spell_teaching(wizard_id);
-CREATE INDEX idx_wizard_spell_teaching_spell_id ON wizard_spell_teaching(spell_id);
-CREATE INDEX idx_marketplace_transactions_buyer ON marketplace_transactions(buyer_wizard_id);
-CREATE INDEX idx_marketplace_transactions_seller ON marketplace_transactions(seller_wizard_id);
-CREATE INDEX idx_marketplace_transactions_type ON marketplace_transactions(transaction_type);
+CREATE INDEX IF NOT EXISTS idx_artifacts_realm_id ON artifacts(realm_id);
+CREATE INDEX IF NOT EXISTS idx_artifacts_rarity ON artifacts(rarity);
+CREATE INDEX IF NOT EXISTS idx_artifacts_available ON artifacts(is_available);
+CREATE INDEX IF NOT EXISTS idx_scrolls_skill_type ON scrolls(skill_type);
+CREATE INDEX IF NOT EXISTS idx_scrolls_available ON scrolls(is_available);
+CREATE INDEX IF NOT EXISTS idx_spells_school ON spells(spell_school);
+CREATE INDEX IF NOT EXISTS idx_spells_element ON spells(element);
+CREATE INDEX IF NOT EXISTS idx_wizard_artifacts_wizard_id ON wizard_artifacts(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_scrolls_wizard_id ON wizard_scrolls(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_spells_wizard_id ON wizard_spells(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_spells_learned_from ON wizard_spells(learned_from_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_spell_teaching_wizard_id ON wizard_spell_teaching(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_spell_teaching_spell_id ON wizard_spell_teaching(spell_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_transactions_buyer ON marketplace_transactions(buyer_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_transactions_seller ON marketplace_transactions(seller_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_transactions_type ON marketplace_transactions(transaction_type);

@@ -126,38 +126,43 @@ CREATE TABLE activity_logs (
 );
 
 -- Create comprehensive indexes
-CREATE INDEX idx_wizards_user_id ON wizards(user_id);
-CREATE INDEX idx_wizards_realm ON wizards(realm);
-CREATE INDEX idx_wizards_element ON wizards(element);
-CREATE INDEX idx_wizards_guild_id ON wizards(guild_id);
-CREATE INDEX idx_wizards_level ON wizards(level);
+CREATE INDEX IF NOT EXISTS idx_wizards_user_id ON wizards(user_id);
+CREATE INDEX IF NOT EXISTS idx_wizards_realm ON wizards(realm);
+CREATE INDEX IF NOT EXISTS idx_wizards_element ON wizards(element);
+CREATE INDEX IF NOT EXISTS idx_wizards_guild_id ON wizards(guild_id);
+CREATE INDEX IF NOT EXISTS idx_wizards_level ON wizards(level);
 
-CREATE INDEX idx_jobs_realm_id ON jobs(realm_id);
-CREATE INDEX idx_jobs_required_element ON jobs(required_element);
-CREATE INDEX idx_jobs_difficulty ON jobs(difficulty);
-CREATE INDEX idx_jobs_is_active ON jobs(is_active);
-CREATE INDEX idx_jobs_created_by_wizard_id ON jobs(created_by_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_realm_id ON jobs(realm_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_required_element ON jobs(required_element);
+CREATE INDEX IF NOT EXISTS idx_jobs_difficulty ON jobs(difficulty);
+CREATE INDEX IF NOT EXISTS idx_jobs_is_active ON jobs(is_active);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_by_wizard_id ON jobs(created_by_wizard_id);
 
-CREATE INDEX idx_job_assignments_job_id ON job_assignments(job_id);
-CREATE INDEX idx_job_assignments_wizard_id ON job_assignments(wizard_id);
-CREATE INDEX idx_job_assignments_status ON job_assignments(status);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_job_id ON job_assignments(job_id);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_wizard_id ON job_assignments(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_job_assignments_status ON job_assignments(status);
 
-CREATE INDEX idx_job_progress_assignment_id ON job_progress(assignment_id);
-CREATE INDEX idx_job_progress_is_active ON job_progress(is_active);
-CREATE INDEX idx_job_progress_started_at ON job_progress(started_at);
-CREATE INDEX idx_job_progress_expected_end_time ON job_progress(expected_end_time);
-CREATE INDEX idx_job_progress_actual_start_time ON job_progress(actual_start_time);
-CREATE INDEX idx_job_progress_last_tick_time ON job_progress(last_tick_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_assignment_id ON job_progress(assignment_id);
+CREATE INDEX IF NOT EXISTS idx_job_progress_is_active ON job_progress(is_active);
+CREATE INDEX IF NOT EXISTS idx_job_progress_started_at ON job_progress(started_at);
+CREATE INDEX IF NOT EXISTS idx_job_progress_expected_end_time ON job_progress(expected_end_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_actual_start_time ON job_progress(actual_start_time);
+CREATE INDEX IF NOT EXISTS idx_job_progress_last_tick_time ON job_progress(last_tick_time);
 
-CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
-CREATE INDEX idx_activity_logs_wizard_id ON activity_logs(wizard_id);
-CREATE INDEX idx_activity_logs_type ON activity_logs(activity_type);
-CREATE INDEX idx_activity_logs_created_at ON activity_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_wizard_id ON activity_logs(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_type ON activity_logs(activity_type);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at);
 
 -- Create partial unique index to prevent duplicate active assignments
-CREATE UNIQUE INDEX job_assignments_active_unique 
-ON job_assignments (job_id, wizard_id) 
-WHERE status IN ('assigned', 'in_progress');
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'job_assignments_active_unique') THEN
+        CREATE UNIQUE INDEX job_assignments_active_unique 
+        ON job_assignments (job_id, wizard_id) 
+        WHERE status IN ('assigned', 'in_progress');
+    END IF;
+END $$;
 
 -- Create update trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -233,61 +238,61 @@ INSERT INTO jobs (realm_id, title, description, required_element, required_level
 (10, 'Nano-Intelligence Debugging', 'Debug malfunctioning AI systems', 'Metal', 4, 180, 50, 90, 2, 'Hard', 'Technical', 'Technarok Core Systems', 'Programming and metal magic skills'),
 
 -- Additional Fire Jobs
-(11, 'Volcanic Observatory Duty', 'Monitor and predict volcanic eruptions', 'Fire', 2, 80, 22, 60, 3, 'Medium', 'Monitoring', 'Pyrrhian Flame Peaks', 'Heat resistance and fire scrying'),
-(12, 'Salamander Ranch Herding', 'Guide and care for fire salamander herds', 'Fire', 1, 40, 12, 30, 5, 'Easy', 'Animal Care', 'Pyrrhian Pastures', 'Beast communication'),
-(13, 'Forgemaster Apprenticeship', 'Learn advanced fire magic weapon crafting', 'Fire', 3, 120, 35, 90, 2, 'Hard', 'Crafting', 'Salamandrine Forges', 'Basic metallurgy'),
-(14, 'Ember Storm Patrol', 'Patrol dangerous fire storm regions', 'Fire', 5, 240, 65, 150, 1, 'Expert', 'Patrol', 'Pyrrhian Stormlands', 'Advanced fire magic'),
+(1, 'Volcanic Observatory Duty', 'Monitor and predict volcanic eruptions', 'Fire', 2, 80, 22, 60, 3, 'Medium', 'Monitoring', 'Pyrrhian Flame Peaks', 'Heat resistance and fire scrying'),
+(1, 'Salamander Ranch Herding', 'Guide and care for fire salamander herds', 'Fire', 1, 40, 12, 30, 5, 'Easy', 'Animal Care', 'Pyrrhian Pastures', 'Beast communication'),
+(1, 'Forgemaster Apprenticeship', 'Learn advanced fire magic weapon crafting', 'Fire', 3, 120, 35, 90, 2, 'Hard', 'Crafting', 'Salamandrine Forges', 'Basic metallurgy'),
+(1, 'Ember Storm Patrol', 'Patrol dangerous fire storm regions', 'Fire', 5, 240, 65, 150, 1, 'Expert', 'Patrol', 'Pyrrhian Stormlands', 'Advanced fire magic'),
 
 -- Additional Water Jobs  
-(15, 'Tidal Pool Research', 'Study magical sea creatures in tidal pools', 'Water', 1, 50, 15, 40, 4, 'Easy', 'Research', 'Thalorion Shorelines', 'Marine biology knowledge'),
-(16, 'Leviathan Communication', 'Establish diplomatic contact with sea giants', 'Water', 6, 350, 90, 200, 1, 'Legendary', 'Diplomacy', 'Thalorion Depths', 'Ancient language mastery'),
-(17, 'Coral Garden Restoration', 'Restore damaged magical coral reefs', 'Water', 2, 70, 20, 80, 3, 'Medium', 'Restoration', 'Thalorion Reefs', 'Aquatic magic'),
-(18, 'Ice Crystal Harvesting', 'Harvest rare ice crystals from frozen caverns', 'Water', 3, 110, 30, 75, 2, 'Hard', 'Harvesting', 'Thalorion Ice Caves', 'Cold resistance'),
+(4, 'Tidal Pool Research', 'Study magical sea creatures in tidal pools', 'Water', 1, 50, 15, 40, 4, 'Easy', 'Research', 'Thalorion Shorelines', 'Marine biology knowledge'),
+(4, 'Leviathan Communication', 'Establish diplomatic contact with sea giants', 'Water', 6, 350, 90, 200, 1, 'Legendary', 'Diplomacy', 'Thalorion Depths', 'Ancient language mastery'),
+(4, 'Coral Garden Restoration', 'Restore damaged magical coral reefs', 'Water', 2, 70, 20, 80, 3, 'Medium', 'Restoration', 'Thalorion Reefs', 'Aquatic magic'),
+(4, 'Ice Crystal Harvesting', 'Harvest rare ice crystals from frozen caverns', 'Water', 3, 110, 30, 75, 2, 'Hard', 'Harvesting', 'Thalorion Ice Caves', 'Cold resistance'),
 
 -- Additional Earth Jobs
-(19, 'Ancient Tree Communion', 'Communicate with the eldest world-trees', 'Earth', 4, 160, 45, 120, 1, 'Expert', 'Communication', 'Terravine Heart', 'Druidic knowledge'),
-(20, 'Root Network Maintenance', 'Maintain the realm-spanning root networks', 'Earth', 2, 60, 18, 50, 4, 'Easy', 'Maintenance', 'Terravine Tunnels', 'Plant affinity'),
-(21, 'Stone Titan Awakening', 'Assist in awakening dormant stone guardians', 'Earth', 5, 220, 60, 180, 1, 'Expert', 'Ritual', 'Terravine Ancient Circles', 'Earth mastery'),
-(22, 'Mushroom Farm Management', 'Tend to magical mushroom cultivation', 'Earth', 1, 35, 10, 25, 6, 'Easy', 'Agriculture', 'Terravine Fungi Caves', 'Basic herbalism'),
+(3, 'Ancient Tree Communion', 'Communicate with the eldest world-trees', 'Earth', 4, 160, 45, 120, 1, 'Expert', 'Communication', 'Terravine Heart', 'Druidic knowledge'),
+(3, 'Root Network Maintenance', 'Maintain the realm-spanning root networks', 'Earth', 2, 60, 18, 50, 4, 'Easy', 'Maintenance', 'Terravine Tunnels', 'Plant affinity'),
+(3, 'Stone Titan Awakening', 'Assist in awakening dormant stone guardians', 'Earth', 5, 220, 60, 180, 1, 'Expert', 'Ritual', 'Terravine Ancient Circles', 'Earth mastery'),
+(3, 'Mushroom Farm Management', 'Tend to magical mushroom cultivation', 'Earth', 1, 35, 10, 25, 6, 'Easy', 'Agriculture', 'Terravine Fungi Caves', 'Basic herbalism'),
 
 -- Additional Air Jobs
-(23, 'Storm Rider Training', 'Learn to ride and navigate storm currents', 'Air', 3, 100, 28, 65, 2, 'Hard', 'Training', 'Zepharion Wind Chambers', 'Flight experience'),
-(24, 'Cloud Palace Security', 'Guard the floating palace districts', 'Air', 2, 75, 22, 55, 3, 'Medium', 'Security', 'Zepharion Upper Cities', 'Wind magic basics'),
-(25, 'Weather Prediction Service', 'Provide weather forecasts using air magic', 'Air', 1, 45, 12, 35, 4, 'Easy', 'Divination', 'Zepharion Observatory', 'Atmospheric sensitivity'),
-(26, 'Cyclone Core Stabilization', 'Prevent the eternal cyclone from expanding', 'Air', 6, 320, 85, 190, 1, 'Legendary', 'Stabilization', 'Zepharion Eye', 'Master wind control'),
+(2, 'Storm Rider Training', 'Learn to ride and navigate storm currents', 'Air', 3, 100, 28, 65, 2, 'Hard', 'Training', 'Zepharion Wind Chambers', 'Flight experience'),
+(2, 'Cloud Palace Security', 'Guard the floating palace districts', 'Air', 2, 75, 22, 55, 3, 'Medium', 'Security', 'Zepharion Upper Cities', 'Wind magic basics'),
+(2, 'Weather Prediction Service', 'Provide weather forecasts using air magic', 'Air', 1, 45, 12, 35, 4, 'Easy', 'Divination', 'Zepharion Observatory', 'Atmospheric sensitivity'),
+(2, 'Cyclone Core Stabilization', 'Prevent the eternal cyclone from expanding', 'Air', 6, 320, 85, 190, 1, 'Legendary', 'Stabilization', 'Zepharion Eye', 'Master wind control'),
 
 -- Additional Light Jobs
-(27, 'Radiant Crystal Polishing', 'Maintain the light-focusing crystals', 'Light', 1, 40, 12, 30, 5, 'Easy', 'Maintenance', 'Virelya Crystal Gardens', 'Light sensitivity'),
-(28, 'Truth Seeking Investigation', 'Use light magic to reveal hidden truths', 'Light', 4, 140, 38, 95, 2, 'Expert', 'Investigation', 'Virelya Justice Halls', 'Truth detection'),
-(29, 'Healing Temple Service', 'Provide light-based healing services', 'Light', 2, 65, 18, 45, 4, 'Medium', 'Healing', 'Virelya Temples', 'Healing magic'),
-(30, 'Solar Flare Management', 'Control and direct solar energy flows', 'Light', 5, 200, 55, 140, 1, 'Expert', 'Energy Control', 'Virelya Solar Nexus', 'Advanced light magic'),
+(5, 'Radiant Crystal Polishing', 'Maintain the light-focusing crystals', 'Light', 1, 40, 12, 30, 5, 'Easy', 'Maintenance', 'Virelya Crystal Gardens', 'Light sensitivity'),
+(5, 'Truth Seeking Investigation', 'Use light magic to reveal hidden truths', 'Light', 4, 140, 38, 95, 2, 'Expert', 'Investigation', 'Virelya Justice Halls', 'Truth detection'),
+(5, 'Healing Temple Service', 'Provide light-based healing services', 'Light', 2, 65, 18, 45, 4, 'Medium', 'Healing', 'Virelya Temples', 'Healing magic'),
+(5, 'Solar Flare Management', 'Control and direct solar energy flows', 'Light', 5, 200, 55, 140, 1, 'Expert', 'Energy Control', 'Virelya Solar Nexus', 'Advanced light magic'),
 
 -- Additional Shadow Jobs
-(31, 'Memory Archive Sorting', 'Organize and catalog stolen memories', 'Shadow', 2, 70, 20, 60, 3, 'Medium', 'Archive', 'Umbros Memory Vaults', 'Mental organization'),
-(32, 'Nightmare Extermination', 'Clear dangerous nightmares from dream spaces', 'Shadow', 4, 130, 35, 85, 2, 'Hard', 'Combat', 'Umbros Dream Rifts', 'Shadow resistance'),
-(33, 'Secret Trade Facilitation', 'Broker deals in forbidden knowledge', 'Shadow', 3, 95, 25, 70, 2, 'Hard', 'Commerce', 'Umbros Black Markets', 'Discretion and cunning'),
-(34, 'Void Rift Sealing', 'Seal dangerous tears in reality', 'Shadow', 5, 180, 50, 130, 1, 'Expert', 'Sealing', 'Umbros Void Borders', 'Void magic knowledge'),
+(6, 'Memory Archive Sorting', 'Organize and catalog stolen memories', 'Shadow', 2, 70, 20, 60, 3, 'Medium', 'Archive', 'Umbros Memory Vaults', 'Mental organization'),
+(6, 'Nightmare Extermination', 'Clear dangerous nightmares from dream spaces', 'Shadow', 4, 130, 35, 85, 2, 'Hard', 'Combat', 'Umbros Dream Rifts', 'Shadow resistance'),
+(6, 'Secret Trade Facilitation', 'Broker deals in forbidden knowledge', 'Shadow', 3, 95, 25, 70, 2, 'Hard', 'Commerce', 'Umbros Black Markets', 'Discretion and cunning'),
+(6, 'Void Rift Sealing', 'Seal dangerous tears in reality', 'Shadow', 5, 180, 50, 130, 1, 'Expert', 'Sealing', 'Umbros Void Borders', 'Void magic knowledge'),
 
 -- Additional Spirit Jobs
-(35, 'Soul Therapy Sessions', 'Help traumatized spirits find peace', 'Spirit', 2, 55, 16, 45, 4, 'Medium', 'Therapy', 'Aetherion Healing Grounds', 'Empathic abilities'),
-(36, 'Dream Bridge Construction', 'Build pathways between dream realms', 'Spirit', 4, 150, 40, 100, 2, 'Expert', 'Construction', 'Aetherion Nexus', 'Spiritual architecture'),
-(37, 'Ghost Census Taking', 'Count and register wandering spirits', 'Spirit', 1, 30, 8, 20, 6, 'Easy', 'Administration', 'Aetherion Registry', 'Spirit sight'),
-(38, 'Emotional Energy Harvesting', 'Collect and refine emotional energy', 'Spirit', 3, 110, 30, 80, 2, 'Hard', 'Collection', 'Aetherion Energy Wells', 'Emotional sensitivity'),
+(8, 'Soul Therapy Sessions', 'Help traumatized spirits find peace', 'Spirit', 2, 55, 16, 45, 4, 'Medium', 'Therapy', 'Aetherion Healing Grounds', 'Empathic abilities'),
+(8, 'Dream Bridge Construction', 'Build pathways between dream realms', 'Spirit', 4, 150, 40, 100, 2, 'Expert', 'Construction', 'Aetherion Nexus', 'Spiritual architecture'),
+(8, 'Ghost Census Taking', 'Count and register wandering spirits', 'Spirit', 1, 30, 8, 20, 6, 'Easy', 'Administration', 'Aetherion Registry', 'Spirit sight'),
+(8, 'Emotional Energy Harvesting', 'Collect and refine emotional energy', 'Spirit', 3, 110, 30, 80, 2, 'Hard', 'Collection', 'Aetherion Energy Wells', 'Emotional sensitivity'),
 
 -- Additional Metal Jobs
-(39, 'Automaton Repair Service', 'Fix and maintain mechanical constructs', 'Metal', 2, 80, 24, 60, 3, 'Medium', 'Repair', 'Technarok Workshops', 'Mechanical aptitude'),
-(40, 'Code Integration Projects', 'Merge organic and digital consciousness', 'Metal', 5, 250, 70, 160, 1, 'Expert', 'Integration', 'Technarok Core Labs', 'Programming mastery'),
-(41, 'Steel God Archaeology', 'Excavate ancient mechanical ruins', 'Metal', 3, 120, 32, 90, 2, 'Hard', 'Archaeology', 'Technarok Ruins', 'Historical knowledge'),
-(42, 'Precision Manufacturing', 'Create ultra-precise magical components', 'Metal', 2, 70, 20, 50, 4, 'Medium', 'Manufacturing', 'Technarok Factories', 'Fine motor control'),
+(10, 'Automaton Repair Service', 'Fix and maintain mechanical constructs', 'Metal', 2, 80, 24, 60, 3, 'Medium', 'Repair', 'Technarok Workshops', 'Mechanical aptitude'),
+(10, 'Code Integration Projects', 'Merge organic and digital consciousness', 'Metal', 5, 250, 70, 160, 1, 'Expert', 'Integration', 'Technarok Core Labs', 'Programming mastery'),
+(10, 'Steel God Archaeology', 'Excavate ancient mechanical ruins', 'Metal', 3, 120, 32, 90, 2, 'Hard', 'Archaeology', 'Technarok Ruins', 'Historical knowledge'),
+(10, 'Precision Manufacturing', 'Create ultra-precise magical components', 'Metal', 2, 70, 20, 50, 4, 'Medium', 'Manufacturing', 'Technarok Factories', 'Fine motor control'),
 
 -- Additional Time Jobs
-(43, 'Paradox Prevention Patrol', 'Prevent dangerous temporal paradoxes', 'Time', 6, 400, 100, 250, 1, 'Legendary', 'Prevention', 'Chronarxis Patrol Routes', 'Temporal theory mastery'),
-(44, 'Timeline Documentation', 'Record and map alternate timelines', 'Time', 3, 130, 35, 95, 2, 'Hard', 'Documentation', 'Chronarxis Archives', 'Timeline sensitivity'),
-(45, 'Clock Tower Maintenance', 'Maintain the realm''s temporal machinery', 'Time', 2, 90, 25, 70, 3, 'Medium', 'Maintenance', 'Chronarxis Clock Towers', 'Mechanical knowledge'),
-(46, 'Fate Thread Weaving', 'Adjust destiny threads for better outcomes', 'Time', 7, 500, 120, 300, 1, 'Legendary', 'Weaving', 'Chronarxis Fate Chambers', 'Fate magic mastery'),
+(9, 'Paradox Prevention Patrol', 'Prevent dangerous temporal paradoxes', 'Time', 6, 400, 100, 250, 1, 'Legendary', 'Prevention', 'Chronarxis Patrol Routes', 'Temporal theory mastery'),
+(9, 'Timeline Documentation', 'Record and map alternate timelines', 'Time', 3, 130, 35, 95, 2, 'Hard', 'Documentation', 'Chronarxis Archives', 'Timeline sensitivity'),
+(9, 'Clock Tower Maintenance', 'Maintain the realm''s temporal machinery', 'Time', 2, 90, 25, 70, 3, 'Medium', 'Maintenance', 'Chronarxis Clock Towers', 'Mechanical knowledge'),
+(9, 'Fate Thread Weaving', 'Adjust destiny threads for better outcomes', 'Time', 7, 500, 120, 300, 1, 'Legendary', 'Weaving', 'Chronarxis Fate Chambers', 'Fate magic mastery'),
 
 -- Additional Void Jobs
-(47, 'Reality Anchor Installation', 'Install devices that prevent reality collapse', 'Void', 4, 160, 45, 120, 2, 'Expert', 'Installation', 'Nyxthar Stable Zones', 'Void resistance'),
-(48, 'Entropy Measurement', 'Monitor and measure reality decay rates', 'Void', 2, 75, 22, 60, 3, 'Medium', 'Monitoring', 'Nyxthar Research Stations', 'Entropy sensitivity'),
-(49, 'Nothing Meditation Guidance', 'Guide others in achieving perfect emptiness', 'Void', 3, 100, 28, 80, 2, 'Hard', 'Guidance', 'Nyxthar Meditation Chambers', 'Void philosophy'),
-(50, 'Silence Priest Recruitment', 'Find and recruit new members to the order', 'Void', 5, 200, 55, 150, 1, 'Expert', 'Recruitment', 'Nyxthar Temples', 'Persuasion and void mastery');
+(7, 'Reality Anchor Installation', 'Install devices that prevent reality collapse', 'Void', 4, 160, 45, 120, 2, 'Expert', 'Installation', 'Nyxthar Stable Zones', 'Void resistance'),
+(7, 'Entropy Measurement', 'Monitor and measure reality decay rates', 'Void', 2, 75, 22, 60, 3, 'Medium', 'Monitoring', 'Nyxthar Research Stations', 'Entropy sensitivity'),
+(7, 'Nothing Meditation Guidance', 'Guide others in achieving perfect emptiness', 'Void', 3, 100, 28, 80, 2, 'Hard', 'Guidance', 'Nyxthar Meditation Chambers', 'Void philosophy'),
+(7, 'Silence Priest Recruitment', 'Find and recruit new members to the order', 'Void', 5, 200, 55, 150, 1, 'Expert', 'Recruitment', 'Nyxthar Temples', 'Persuasion and void mastery');

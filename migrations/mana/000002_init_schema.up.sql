@@ -1,8 +1,8 @@
 
 -- Create indices for better query performance
-CREATE INDEX idx_mana_transactions_from_wizard ON mana_transactions(from_wizard_id);
-CREATE INDEX idx_mana_transactions_to_wizard ON mana_transactions(to_wizard_id);
-CREATE INDEX idx_mana_transactions_created_at ON mana_transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_mana_transactions_from_wizard ON mana_transactions(from_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_mana_transactions_to_wizard ON mana_transactions(to_wizard_id);
+CREATE INDEX IF NOT EXISTS idx_mana_transactions_created_at ON mana_transactions(created_at);
 
 -- Create investment_types table
 CREATE TABLE IF NOT EXISTS investment_types (
@@ -35,10 +35,10 @@ CREATE TABLE IF NOT EXISTS wizard_investments (
 );
 
 -- Create indices for investment tables
-CREATE INDEX idx_investment_types_risk_level ON investment_types(risk_level);
-CREATE INDEX idx_wizard_investments_wizard_id ON wizard_investments(wizard_id);
-CREATE INDEX idx_wizard_investments_status ON wizard_investments(status);
-CREATE INDEX idx_wizard_investments_end_time ON wizard_investments(end_time);
+CREATE INDEX IF NOT EXISTS idx_investment_types_risk_level ON investment_types(risk_level);
+CREATE INDEX IF NOT EXISTS idx_wizard_investments_wizard_id ON wizard_investments(wizard_id);
+CREATE INDEX IF NOT EXISTS idx_wizard_investments_status ON wizard_investments(status);
+CREATE INDEX IF NOT EXISTS idx_wizard_investments_end_time ON wizard_investments(end_time);
 
 -- Create update trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
