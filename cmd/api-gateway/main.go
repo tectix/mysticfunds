@@ -23,6 +23,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type contextKey string
+
+const userIDKey contextKey = "user_id"
+
 type Gateway struct {
 	authClient   authpb.AuthServiceClient
 	wizardClient wizardpb.WizardServiceClient
@@ -110,7 +114,7 @@ func main() {
 	// Health check endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	// Serve static files - find the web directory
@@ -206,7 +210,7 @@ func (g *Gateway) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Add user ID to request context
-		ctx = context.WithValue(r.Context(), "user_id", resp.UserId)
+		ctx = context.WithValue(r.Context(), userIDKey, resp.UserId)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
@@ -249,7 +253,7 @@ func (g *Gateway) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -275,7 +279,7 @@ func (g *Gateway) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleRefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -301,7 +305,7 @@ func (g *Gateway) handleRefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -327,7 +331,7 @@ func (g *Gateway) handleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
@@ -348,7 +352,9 @@ func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get user ID from context for filtering user's own wizards
-		userID := r.Context().Value("user_id").(int64)
+		type contextKey string
+		const userIDKey contextKey = "user_id"
+		userID := r.Context().Value(userIDKey).(int64)
 
 		resp, err := g.wizardClient.ListWizards(ctx, &wizardpb.ListWizardsRequest{
 			PageSize:   int32(pageSize),
@@ -373,7 +379,7 @@ func (g *Gateway) handleWizards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get user ID from context
-		userID := r.Context().Value("user_id").(int64)
+		userID := r.Context().Value(userIDKey).(int64)
 		req.UserId = userID
 
 		resp, err := g.wizardClient.CreateWizard(ctx, &req)
@@ -486,7 +492,7 @@ func (g *Gateway) handleManaBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleManaTransfer(w http.ResponseWriter, r *http.Request) {
@@ -512,7 +518,7 @@ func (g *Gateway) handleManaTransfer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleManaTransactions(w http.ResponseWriter, r *http.Request) {
@@ -554,7 +560,7 @@ func (g *Gateway) handleManaTransactions(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleInvestments(w http.ResponseWriter, r *http.Request) {
@@ -632,7 +638,7 @@ func (g *Gateway) handleInvestmentTypes(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleExploreWizards(w http.ResponseWriter, r *http.Request) {
@@ -668,7 +674,7 @@ func (g *Gateway) handleExploreWizards(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleJobs(w http.ResponseWriter, r *http.Request) {
@@ -815,7 +821,7 @@ func (g *Gateway) handleJobAssignment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleJobAssignments(w http.ResponseWriter, r *http.Request) {
@@ -854,7 +860,7 @@ func (g *Gateway) handleJobAssignments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleJobAssignmentByID(w http.ResponseWriter, r *http.Request) {
@@ -958,7 +964,7 @@ func (g *Gateway) handleActivities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleJobProgress(w http.ResponseWriter, r *http.Request) {
@@ -1045,7 +1051,7 @@ func (g *Gateway) handleJobAssignmentCancel(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (g *Gateway) handleRealms(w http.ResponseWriter, r *http.Request) {
@@ -1065,5 +1071,5 @@ func (g *Gateway) handleRealms(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
