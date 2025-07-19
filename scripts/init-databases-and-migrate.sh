@@ -74,6 +74,6 @@ run_migrations "mana" "mana"
 
 echo "All databases created and migrations completed successfully!"
 
-# Keep the container running (for web service)
-echo "Migration service ready - databases initialized!"
-tail -f /dev/null
+# Exit successfully - job is complete
+echo "Migration job completed successfully!"
+exit 0
