@@ -36,6 +36,16 @@ run_migrations() {
         return 0
     fi
     
+    # Check for dirty state and fix if needed
+    migrate -path "/migrations/$service" \
+            -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
+            version 2>/dev/null || {
+        echo "Database in dirty state, forcing clean..."
+        migrate -path "/migrations/$service" \
+                -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
+                force 1
+    }
+    
     # Run migrations
     migrate -path "/migrations/$service" \
             -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
