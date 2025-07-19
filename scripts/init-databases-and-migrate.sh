@@ -36,20 +36,23 @@ run_migrations() {
         return 0
     fi
     
-    # Check for dirty state and fix if needed
+    # Try to run migrations, if dirty state detected, force clean and retry
     migrate -path "/migrations/$service" \
             -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
-            version 2>/dev/null || {
-        echo "Database in dirty state, forcing clean..."
+            up 2>&1 | tee /tmp/migrate_output
+    
+    # Check if migration failed due to dirty state
+    if grep -q "Dirty database version" /tmp/migrate_output; then
+        echo "Database in dirty state, forcing clean and retrying..."
         migrate -path "/migrations/$service" \
                 -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
-                force 1
-    }
-    
-    # Run migrations
-    migrate -path "/migrations/$service" \
-            -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
-            up
+                force 10
+        
+        # Retry migration
+        migrate -path "/migrations/$service" \
+                -database "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$db_name?sslmode=require" \
+                up
+    fi
     
     if [ $? -eq 0 ]; then
         echo "$service migrations completed successfully"
