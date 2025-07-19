@@ -20,10 +20,10 @@ cmd/mana-service/bin/
 cmd/api-gateway/bin/
 
 # Binary files built in root (from go build commands)
-auth-service
-wizard-service
-mana-service
-api-gateway
+/auth-service
+/wizard-service
+/mana-service
+/api-gateway
 
 # Log files and runtime data
 *.log
