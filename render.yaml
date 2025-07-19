@@ -33,6 +33,8 @@ services:
     env: docker
     dockerfilePath: cmd/auth-service/Dockerfile
     plan: free
+    dependsOn:
+      - migrations
     envVars:
       - key: GRPC_PORT
         value: 50051
@@ -64,6 +66,8 @@ services:
     env: docker
     dockerfilePath: cmd/wizard-service/Dockerfile
     plan: free
+    dependsOn:
+      - migrations
     envVars:
       - key: GRPC_PORT
         value: 50052
@@ -93,6 +97,8 @@ services:
     env: docker
     dockerfilePath: cmd/mana-service/Dockerfile
     plan: free
+    dependsOn:
+      - migrations
     envVars:
       - key: GRPC_PORT
         value: 50053
@@ -122,6 +128,10 @@ services:
     env: docker
     dockerfilePath: cmd/api-gateway/Dockerfile
     plan: free
+    dependsOn:
+      - auth-service
+      - wizard-service
+      - mana-service
     envVars:
       - key: HTTP_PORT
         value: 8080
