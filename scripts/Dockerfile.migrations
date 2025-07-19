@@ -1,0 +1,13 @@
+FROM postgres:15-alpine
+
+# Install migrate tool
+RUN apk add --no-cache curl bash
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
+RUN mv migrate /usr/local/bin/
+
+# Copy migration files and scripts
+COPY migrations/ /migrations/
+COPY scripts/init-databases-and-migrate.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init-databases-and-migrate.sh
+
+CMD ["/usr/local/bin/init-databases-and-migrate.sh"]
