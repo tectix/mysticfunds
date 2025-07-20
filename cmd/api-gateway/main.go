@@ -157,7 +157,7 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir(webDir)))
 
-	port := cfg.GetString("HTTP_PORT", "8080")
+	port := cfg.GetString("PORT", "8080")
 	logger.Info("API Gateway starting", "port", port)
 
 	server := &http.Server{

@@ -104,7 +104,7 @@ services:
     plan: free
     preDeployCommand: ./scripts/setup-databases.sh
     envVars:
-      - key: HTTP_PORT
+      - key: PORT
         value: 8080
       - key: LOG_LEVEL
         value: info
