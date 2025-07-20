@@ -5,36 +5,12 @@ databases:
     plan: free
 
 services:
-  - type: background_worker
-    name: migrations
-    env: docker
-    dockerfilePath: scripts/Dockerfile.migrations
-    plan: free
-    envVars:
-      - key: DB_HOST
-        fromDatabase:
-          name: mysticfunds-postgres
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: mysticfunds-postgres
-          property: port
-      - key: DB_USER
-        fromDatabase:
-          name: mysticfunds-postgres
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: mysticfunds-postgres
-          property: password
-
-  - type: background_worker
+  - type: private_service
     name: auth-service
     env: docker
     dockerfilePath: cmd/auth-service/Dockerfile
     plan: free
-    dependsOn:
-      - migrations
+    preDeployCommand: ./scripts/run-migrations.sh auth
     envVars:
       - key: GRPC_PORT
         value: 50051
@@ -61,13 +37,12 @@ services:
       - key: DB_NAME
         value: auth
 
-  - type: background_worker
+  - type: private_service
     name: wizard-service
     env: docker
     dockerfilePath: cmd/wizard-service/Dockerfile
     plan: free
-    dependsOn:
-      - migrations
+    preDeployCommand: ./scripts/run-migrations.sh wizard
     envVars:
       - key: GRPC_PORT
         value: 50052
@@ -92,13 +67,12 @@ services:
       - key: DB_NAME
         value: wizard
 
-  - type: background_worker
+  - type: private_service
     name: mana-service
     env: docker
     dockerfilePath: cmd/mana-service/Dockerfile
     plan: free
-    dependsOn:
-      - migrations
+    preDeployCommand: ./scripts/run-migrations.sh mana
     envVars:
       - key: GRPC_PORT
         value: 50053
@@ -128,10 +102,7 @@ services:
     env: docker
     dockerfilePath: cmd/api-gateway/Dockerfile
     plan: free
-    dependsOn:
-      - auth-service
-      - wizard-service
-      - mana-service
+    preDeployCommand: ./scripts/setup-databases.sh
     envVars:
       - key: HTTP_PORT
         value: 8080
@@ -139,16 +110,32 @@ services:
         value: info
       - key: AUTH_SERVICE_ADDR
         fromService:
-          type: background_worker
+          type: private_service
           name: auth-service
           property: hostport
       - key: WIZARD_SERVICE_ADDR
         fromService:
-          type: background_worker
+          type: private_service
           name: wizard-service
           property: hostport
       - key: MANA_SERVICE_ADDR
         fromService:
-          type: background_worker
+          type: private_service
           name: mana-service
           property: hostport
+      - key: DB_HOST
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mysticfunds-postgres
+          property: password
