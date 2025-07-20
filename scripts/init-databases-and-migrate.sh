@@ -74,6 +74,6 @@ run_migrations "mana" "mana"
 
 echo "All databases created and migrations completed successfully!"
 
-# Exit successfully - job is complete
-echo "Migration job completed successfully!"
-exit 0
+# Keep running to maintain service
+echo "Migration service ready - databases initialized!"
+tail -f /dev/null
